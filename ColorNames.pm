@@ -11,7 +11,7 @@ use Carp;
 
 @ISA = qw( Exporter );
 
-$VERSION   = '0.21';
+$VERSION   = '0.22';
 
 @EXPORT    = qw( );
 @EXPORT_OK = qw( hex2tuple tuple2hex );
@@ -220,9 +220,32 @@ hexidecimal format, use the C<tuple2hex> function:
 The C<hex2tuple> and C<tuple2hex> functions are not exported by default. You
 must specify them explicitly when you 'use' the module.
 
-=head1 CAVEAT
+=head2 Adding Naming Schemes
 
-This module is experimental. The interface may change.
+You can add naming scheme files by creating a Perl module is the name
+C<Graphics::ColorNames::SCHEMENAME> which has a subroutine named
+C<NamesRgbTable> that returns a hash of color names and RGB values.
+
+The color names must be in all lower-case, and the RGB values must be
+24-bit numbers containing the red, green, and blue values in most- significant
+to least- significant byte order.
+
+An example naming schema is below:
+
+  package Graphics::ColorNames::Metallic;
+
+  sub NamesRgbTable() {
+    use integer;
+    return {
+      copper => 0xb87333,
+      gold   => 0xcd7f32,
+      silver => 0xe6e8fa,
+    };
+  }
+
+You would use the above schema as follows:
+
+  tie %colors, 'Graphics::ColorNames', 'Metallic';
 
 =head1 AUTHOR
 

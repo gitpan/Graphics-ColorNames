@@ -1,14 +1,14 @@
 # Makefile.PL for Graphics-ColorNames package
-# $Id$
+# $Id: Makefile.pl,v 0.22 2001/04/15 13:39:31 rob Exp rob $
 
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
     'PM' => {
        'ColorNames.pm'  => '$(INST_LIBDIR)/ColorNames.pm',
-       'X.pm'           => '$(INST_LIBDIR)/ColorNames/X/X.pm',
-       'HTML.pm'        => '$(INST_LIBDIR)/ColorNames/HTML/HTML.pm',
-       'Windows.pm'     => '$(INST_LIBDIR)/ColorNames/Windows/Windows.pm',
+       'X.pm'           => '$(INST_LIBDIR)/ColorNames/X.pm',
+       'HTML.pm'        => '$(INST_LIBDIR)/ColorNames/HTML.pm',
+       'Windows.pm'     => '$(INST_LIBDIR)/ColorNames/Windows.pm',
     },
     'NAME'		=> 'Graphics::ColorNames',
     'VERSION_FROM'	=> 'ColorNames.pm',

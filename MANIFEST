@@ -8,7 +8,6 @@ t/ColorNames.t
 t/HTML.t
 t/Windows.t
 t/X.t
-test.pl
 Windows.pm
 X.pm
 
