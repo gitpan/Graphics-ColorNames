@@ -5,11 +5,11 @@ Makefile.PL
 MANIFEST
 Netscape.pm
 README
-t/ColorNames.t
-t/HTML.t
-t/Netscape.t
-t/Windows.t
-t/X.t
+t/01-ColorNames.t
+t/02-X.t
+t/03-HTML.t
+t/04-Windows.t
+t/05-Netscape.t
 Windows.pm
 X.pm
 

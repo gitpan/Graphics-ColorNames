@@ -1,6 +1,12 @@
 Revision history for Perl extension Graphics::ColorNames.
 
-0.23  17 Mar 2001
+0.24  28 Apr 2001
+	- fixed  colors in X.pm (such as some 'green') defined as 0x000000
+	- removed duplicate grays (ie, 'gray0') from X.pm
+	- renamed test suite files to enforce testing order
+	- v0.23 mistakenly dated 17 Mar instead of 17 April
+
+0.23  17 Apr 2001
 	- X-Windows color names now from rgb.txt (includes names with
 	  spaces, such as 'alice blue' as well as 'aliceblue')
 	- Added Netscape color naming scheme

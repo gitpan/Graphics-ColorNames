@@ -11,7 +11,7 @@ ok(1);
 tie my %colors, 'Graphics::ColorNames', 'X';
 ok(1);
 
-ok(keys %colors, 752); #
+ok(keys %colors, 651); #
 
 my $count = 0;
 foreach my $name (keys %colors)

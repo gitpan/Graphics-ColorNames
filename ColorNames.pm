@@ -11,7 +11,7 @@ use Carp;
 
 @ISA = qw( Exporter );
 
-$VERSION   = '0.23';
+$VERSION   = '0.24';
 
 @EXPORT    = qw( );
 @EXPORT_OK = qw( hex2tuple tuple2hex );
@@ -182,8 +182,7 @@ Currently three schemes are available:
 
 =item X
 
-752 color names used in X-Windows. I<This is the default naming scheme>, since
-it provides the most names.
+About 650 color names used in X-Windows. I<This is the default naming scheme>, since it provides the most names.
 
 =item HTML
 
@@ -257,10 +256,13 @@ You would use the above schema as follows:
 
 Robert Rothenberg <rrwo@cpan.org>
 
-=head1 CONTRIBUTORS
+=head1 ACKNOWLEDGEMENTS
 
 Alan D. Salewski <alans@cji.com> for feedback and the addition of
 C<tuple2hex>.
+
+Steve Pomeroy <steve_x@earthling.net> for pointing out invalid color
+definitions in C<X.pm> v1.02.
 
 =head1 LICENSE
 
