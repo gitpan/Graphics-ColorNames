@@ -5,13 +5,15 @@ my $build = Module::Build->new
      module_name => 'Graphics::ColorNames',
      license => 'perl',
      requires => {
-       'perl'                       => '5.005',
+       'perl'                       => '5.6.0',
        'Carp'                       => 0,
+       'IO::File'                   => 0,
      },
      recommends => {
      },
      build_requires => {
        'Test::More'                 => 0,
+       'Test'                       => 0,
      },
      create_makefile_pl => 'traditional',
      dist_author        => 'Robert Rothenberg <rrwo at cpan.org>',

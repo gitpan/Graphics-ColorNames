@@ -2,7 +2,7 @@ NAME
     Graphics::ColorNames - defines RGB values for common color names
 
 REQUIREMENTS
-    `Graphics::ColorNames' should work on Perl 5.005.
+    `Graphics::ColorNames' should work on Perl 5.6.0.
 
     It uses only standard modules.
 
@@ -49,6 +49,14 @@ DESCRIPTION
 HISTORY
     Revision history since v0.32:
 
+    0.39_02 22 Jul 2004
+	* now requires Perl 5.6.0
+	- uses IO::File
+	- option to parse an rgb.txt file
+	- removed TODO from distribution
+	- Netscape.pm, HTML.pm and Windows.pm warnings enabled
+	- additions and corrections in POD
+
     0.39_01 21 Jul 2004
 	- added Build.PL to distribution
 	- added hex() and rgb() methods
@@ -58,7 +66,7 @@ HISTORY
     A more detailed revision history is available in the Changes file.
 
 AUTHOR
-    Robert Rothenberg <rrwo@cpan.org>
+    Robert Rothenberg <rrwo at cpan.org>
 
 LICENSE
     Copyright (c) 2001-2004 Robert Rothenberg. All rights

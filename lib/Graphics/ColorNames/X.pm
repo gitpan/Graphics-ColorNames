@@ -28,15 +28,20 @@ Robert Rothenberg <rrwo at cpan.org>
 
 Steve Pomeroy <steve_x at earthling.net> -- fixed the broken color definitions
 
+=head1 LICENSE
+
+Copyright (c) 2001-2004 Robert Rothenberg. All rights reserved.
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
 =cut
 
-require 5.005;
+require 5.006;
+
 use strict;
 use warnings;
 
-use vars qw( $VERSION );
-
-$VERSION = '1.06';
+our $VERSION = '1.06';
 
 # Original name and colors (v1.01 and earlier) from Kevin J. Walsh,
 # http://eies.njit.edu/~walsh/rgb.html

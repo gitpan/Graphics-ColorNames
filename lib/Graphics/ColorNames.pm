@@ -1,24 +1,62 @@
 package Graphics::ColorNames;
 
-require 5.005;
+require 5.006;
 
 use strict;
-
-use vars qw( @ISA $VERSION @EXPORT @EXPORT_OK );
+use warnings;
 
 use Carp;
+use IO::File;
 
-@ISA = qw( Exporter );
+our @ISA = qw( Exporter );
 
-$VERSION   = '0.39_01'; $VERSION = eval $VERSION;
+our $VERSION   = '0.39_02';
+$VERSION = eval $VERSION;
 
-@EXPORT    = qw( );
-@EXPORT_OK = qw( hex2tuple tuple2hex );
+our @EXPORT    = qw( );
+our @EXPORT_OK = qw( hex2tuple tuple2hex );
+
+sub _load_file {
+  my $self = shift;
+  my $file = shift;
+
+  unless (-r $file) {
+    croak "Cannot load scheme from file: \'$file\'";
+  }
+
+  my $colors = { };
+
+  my $fh = new IO::File;
+  open($fh, $file)
+    or croak "Cannot open file: \'$file\'";
+
+  while (my $line = <$fh>) {
+    unless ($line =~ /^[\!\#]/) {
+      chomp($line);
+      if ($line) {
+	my ($red, $green, $blue, $name, $rgb);
+	$red   = eval substr($line,  0, 3);
+	$green = eval substr($line,  4, 3);
+	$blue  = eval substr($line,  8, 3);
+
+	$rgb   = ($red << 16) | ($green << 8) | ($blue);
+
+	$name  = substr($line, 12);
+	$name =~ s/^\s+//; # remove leading and trailing spaces
+	$name =~ s/\s+$//;
+
+	$colors->{lc($name)} = $rgb;
+      }
+    }
+  }
+  close $fh;
+
+  push @{ $self->{SCHEMES} }, $colors;
+}
 
 sub _load_scheme
   {
     my $self   = shift;
-
     my $scheme = shift;
 
     my $module = "Graphics\:\:ColorNames\:\:$scheme";
@@ -44,17 +82,19 @@ sub TIEHASH
 
     bless $self, $class;
 
-    if (@_)
-      {
-	foreach my $scheme (@_)
-	  {
-	    $self->_load_scheme( $scheme );
-	  }
+    if (@_) {
+      foreach my $scheme (@_) {
+	if (-e $scheme) {
+	  $self->_load_file( $scheme );
+	}
+	else {
+	  $self->_load_scheme( $scheme );
+	}
       }
-    else
-      {
-	$self->_load_scheme( 'X' );
-      }
+    }
+    else {
+      $self->_load_scheme( 'X' );
+    }
 
     return $self;
   }
@@ -227,8 +267,8 @@ The standard interface (prior to version 0.40) is through a tied hash:
 
   tie %NAMETABLE, 'Graphics::ColorNames', @SCHEME
 
-where C<%NAMETABLE> is the tied hash and C<@SCHEME> is the
-L<color scheme(s)|/Color Schemes> specified.
+where C<%NAMETABLE> is the tied hash and C<@SCHEME> is a list of
+L<color schemes|/Color Schemes> or the path to a F<rgb.txt> file.
 
 Multiple schemes can be used:
 
@@ -250,7 +290,7 @@ blue values (between 0 and 255), use the L</hex2tuple> function.
 
 If you prefer, an object-oriented interface is available:
 
-  $obj = Graphics::ColorNames->new( 'X' );
+  $obj = Graphics::ColorNames->new('/etc/rgb.txt');
 
   $hex = $obj->hex('skyblue'); # returns "87ceeb"
 
@@ -259,6 +299,13 @@ If you prefer, an object-oriented interface is available:
 The interface is similar to the L<Color::Rgb> module:
 
 =over
+
+=item new
+
+  $obj = Graphics::ColorNames->new( @SCHEMES );
+
+Creates the object, using the default L<color schemes|/Color Schemes>.
+If none are specified, it uses the C<X> scheme.
 
 =item hex
 
@@ -314,7 +361,7 @@ Currently four schemes are available:
 
 =item X
 
-About 650 color names used in X-Windows. I<This is the default naming
+About 750 color names used in X-Windows. I<This is the default naming
 scheme>, since it provides the most names.
 
 =item HTML
