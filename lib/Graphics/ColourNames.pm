@@ -9,7 +9,7 @@ require Graphics::ColorNames;
 
 use base 'Graphics::ColorNames';
 
-our $VERSION = '1.00';
+our $VERSION = '1.03';
 
 our @EXPORT    = qw( );
 our @EXPORT_OK = qw( hex2tuple tuple2hex );

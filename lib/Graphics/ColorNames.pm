@@ -11,7 +11,7 @@ use Module::Load;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '1.02';
+our $VERSION   = '1.03';
 # $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );
@@ -73,7 +73,6 @@ sub _load_scheme
       {
 	no strict 'refs';
         $self->{SCHEMES}->[ $self->{COUNT}++ ] = $module->NamesRgbTable();
-#	push @{ $self->{SCHEMES} }, $module->NamesRgbTable();
       }
     }
 
@@ -120,7 +119,17 @@ sub FETCH
 	my $i = 0;
 	while ( (!defined $value) and ($i < $self->{COUNT}) )
 	  {
-	    $value = $self->{SCHEMES}->[$i++]->{ lc($key) };
+	    my $scheme = $self->{SCHEMES}->[$i++];
+	    my $type   = ref($scheme);
+	    if ($type eq 'HASH') {
+	      $value = $scheme->{ lc($key) };
+	    }
+	    elsif ($type eq 'CODE') {
+	      $value = &$scheme(lc($key));
+	    }
+	    else {
+	      croak "Unsupported scheme type: ", $type;
+	    }
 	  }
 	$value = sprintf( '%06x', $value ), if (defined $value);
       }
@@ -136,13 +145,20 @@ sub EXISTS
 sub FIRSTKEY
   {
     my $self = shift;
-    my $a = keys %{$self->{SCHEMES}->[0]};
+    my $scheme = $self->{SCHEMES}->[0];
+    if (ref($scheme) ne 'HASH') {
+      croak "Scheme is not a hash";
+    }
     each %{$self->{SCHEMES}->[0]};
   }
 
 sub NEXTKEY
   {
     my $self = shift;
+    my $scheme = $self->{SCHEMES}->[0];
+    if (ref($scheme) ne 'HASH') {
+      croak "Scheme is not a hash";
+    }
     each %{$self->{SCHEMES}->[0]};
   }
 

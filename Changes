@@ -1,5 +1,10 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+1.03    Thu Aug 26 2004
+	- hooks to support CODE scheme types (as with module
+          Graphics::ColorNames::GrayScale 2.00)
+        - ColourNames.pm has same version of ColorNames.pm
+
 1.02    Tue Aug 24 2004
 	- added Graphics::ColourNames alias
 	- minor changes to ColorNames.pm
