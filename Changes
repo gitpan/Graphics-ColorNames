@@ -1,5 +1,11 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+1.01    Wed Aug 18 2004
+	- corrected typo in REQUIREMENTS (wrong Perl version)
+	- uses Module::Load for improved dynamic loading
+	- EXISTS works across multiple color schemes
+	- bug in FETCH that returned key has been fixed
+
 1.00    Sat Jul 31 2004
 	- changed version to 1.00 as release appears to be stable
 	- corrected bad link in POD

@@ -4,7 +4,9 @@ NAME
 REQUIREMENTS
     `Graphics::ColorNames' should work on Perl 5.6.0.
 
-    It uses only standard modules.
+    It requires the following non-standard modules:
+
+      Module::Load
 
   Installation
 
@@ -47,27 +49,13 @@ DESCRIPTION
     module's POD.
 
 HISTORY
-    Revision history since v0.32:
+    Revision history since v1.00:
 
-    0.39_04 Mon Jul 26 2004
-	- rebuilt distribution with proper META.yml
-
-    0.39_03 22 Jul 2004
-	- added required rgb.txt for tests to MANIFEST and distro
-
-    0.39_02 22 Jul 2004
-	* now requires Perl 5.6.0
-	- uses IO::File
-	- option to parse an rgb.txt file
-	- removed TODO from distribution
-	- Netscape.pm, HTML.pm and Windows.pm warnings enabled
-	- additions and corrections in POD
-
-    0.39_01 21 Jul 2004
-	- added Build.PL to distribution
-	- added hex() and rgb() methods
-	- created object-oriented interface
-	- additions and corrections in POD
+    1.01    Wed Aug 18 2004
+	- corrected typo in REQUIREMENTS (wrong Perl version)
+	- uses Module::Load for improved dynamic loading
+	- EXISTS works across multiple color schemes
+	- bug in FETCH that returned key has been fixed
 
     A more detailed revision history is available in the Changes file.
 

@@ -7,10 +7,11 @@ use warnings;
 
 use Carp;
 use IO::File;
+use Module::Load;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '1.00';
+our $VERSION   = '1.01';
 # $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );
@@ -51,7 +52,8 @@ sub _load_file {
   }
   close $fh;
 
-  push @{ $self->{SCHEMES} }, $colors;
+  $self->{SCHEMES}->[ $self->{COUNT}++ ] = $colors;
+#  push @{ $self->{SCHEMES} }, $colors;
 }
 
 sub _load_scheme
@@ -60,7 +62,9 @@ sub _load_scheme
     my $scheme = shift;
 
     my $module = "Graphics\:\:ColorNames\:\:$scheme";
-    eval "require $module;";
+    eval {
+      load $module;
+    };
     if ($@)
       {
 	croak "Cannot load color naming scheme \`$scheme\'";
@@ -68,7 +72,8 @@ sub _load_scheme
     else
       {
 	no strict 'refs';
-	push @{ $self->{SCHEMES} }, $module->NamesRgbTable();
+        $self->{SCHEMES}->[ $self->{COUNT}++ ] = $module->NamesRgbTable();
+#	push @{ $self->{SCHEMES} }, $module->NamesRgbTable();
       }
     }
 
@@ -78,6 +83,7 @@ sub TIEHASH
 
     my $self  = {
       SCHEMES => [ ], # a list of naming schemes, in priority search order
+      COUNT   => 0,
     };
 
     bless $self, $class;
@@ -104,7 +110,7 @@ sub FETCH
     my ($self, $key) = @_;
 
     my $value;
-    if ($key =~ m/\x23?[\da-f]{6}/i)
+    if ($key =~ m/^\x23?[\da-f]{6}$/i)
       {
 	$value =  $key;
 	$value =~ s/\x23//;
@@ -112,7 +118,7 @@ sub FETCH
     else
       {
 	my $i = 0;
-	while ( (!defined $value) and (defined $self->{SCHEMES}->[$i]) )
+	while ( (!defined $value) and ($i < $self->{COUNT}) )
 	  {
 	    $value = $self->{SCHEMES}->[$i++]->{ lc($key) };
 	  }
@@ -124,7 +130,7 @@ sub FETCH
 sub EXISTS
   {
     my ($self, $key) = @_;
-    exists( $self->{SCHEMES}->[0]->{ lc($key) } );
+    defined ($self->FETCH($key));
   }
 
 sub FIRSTKEY
@@ -205,9 +211,10 @@ Graphics::ColorNames - defines RGB values for common color names
 
 =head1 REQUIREMENTS
 
-C<Graphics::ColorNames> should work on Perl 5.005.
+C<Graphics::ColorNames> should work on Perl 5.6.0.  It requires the
+following non-standard modules:
 
-It uses only standard modules.
+  Module::Load
 
 =head2 Installation
 

@@ -7,6 +7,7 @@ WriteMakefile
           'PREREQ_PM' => {
                            'Carp' => '0',
                            'IO::File' => '0',
+                           'Module::Load' => '0.1',
                            'Test' => '0',
                            'Test::More' => '0'
                          },

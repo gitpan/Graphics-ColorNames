@@ -8,6 +8,7 @@ my $build = Module::Build->new
        'perl'                       => '5.6.0',
        'Carp'                       => 0,
        'IO::File'                   => 0,
+       'Module::Load'               => 0.10,
      },
      recommends => {
      },
