@@ -1,0 +1,13 @@
+Changes
+ColorNames.pm
+HTML/HTML.pm
+HTML/Makefile.PL
+Makefile.PL
+MANIFEST
+README
+test.pl
+Windows/Makefile.PL
+Windows/Windows.pm
+X/Makefile.PL
+X/X.pm
+
