@@ -16,6 +16,13 @@ Graphics::ColorNames::HTML - HTML color names and equivalent RGB values
 This module defines color names and their associated RGB values from the
 HTML 4.0 Specification.
 
+=head2 Note
+
+In versions prior to 1.1, "fuchsia" was misspelled "fuscia". This
+mispelling came from un unidentified HTML specification.  It also
+appears to be a common misspelling, so rather than change it, the
+proper spelling was added.
+
 =head1 SEE ALSO
 
 C<Graphics::ColorNames>,  HTML 4.0 Specificiation <http://www.w3.org>
@@ -23,6 +30,12 @@ C<Graphics::ColorNames>,  HTML 4.0 Specificiation <http://www.w3.org>
 =head1 AUTHOR
 
 Robert Rothenberg <rrwo@cpan.org>
+
+=head1 LICENSE
+
+Copyright (c) 2001-2002 Robert Rothenberg. All rights reserved.
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
 
 =cut
 
@@ -32,7 +45,7 @@ use strict;
 
 use vars qw( $VERSION );
 
-$VERSION = '1.01';
+$VERSION = '1.1';
 
 sub NamesRgbTable() {
   use integer;
@@ -41,7 +54,8 @@ sub NamesRgbTable() {
     'blue'	         => 0x0000ff,
     'aqua'	         => 0x00ffff,
     'lime'	         => 0x00ff00,
-    'fuscia'	         => 0xff00ff,
+    'fuchsia'	         => 0xff00ff, # "fuscia" is incorrect but common
+    'fuscia'             => 0xff00ff, # mis-spelling...
     'red'	         => 0xff0000,
     'yellow'	         => 0xffff00,
     'white'	         => 0xffffff,

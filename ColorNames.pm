@@ -10,7 +10,7 @@ use Carp;
 
 @ISA = qw( Exporter );
 
-$VERSION   = '0.30';
+$VERSION   = '0.31';
 
 @EXPORT    = qw( );
 @EXPORT_OK = qw( hex2tuple tuple2hex );
@@ -295,6 +295,9 @@ You would use the above schema as follows:
 
   tie %colors, 'Graphics::ColorNames', 'Metallic';
 
+An example of an additional module is Steve Pomeroy's
+Graphics::ColorNames::Mozilla module.
+
 =head1 AUTHOR
 
 Robert Rothenberg <rrwo@cpan.org>
@@ -304,12 +307,15 @@ Robert Rothenberg <rrwo@cpan.org>
 Alan D. Salewski <alans@cji.com> for feedback and the addition of
 C<tuple2hex>.
 
-Steve Pomeroy <steve_x@earthling.net> for pointing out invalid color
+Steve Pomeroy <xavier@cpan.org> for pointing out invalid color
 definitions in C<X.pm> v1.02.
+
+<chemboy@perlmonk.org> who pointed out a mispelling of "fuchsia" in
+the HTML color space <https://rt.cpan.org/Ticket/Display.html?id=1704>.
 
 =head1 LICENSE
 
-Copyright (c) 2001 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2002 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

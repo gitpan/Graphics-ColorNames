@@ -1,5 +1,8 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+0.31  23 Oct 2002
+	- fixed mispelling of "fuchsia" in HTML.pm
+
 0.30   4 Oct 2001
 	- fixed bug with non-existent color names
 	- corrected some typos in and updated the documentation

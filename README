@@ -16,13 +16,10 @@ REQUIREMENTS
       make install
 
 HISTORY
-    Revision history since v0.24:
+    Revision history since v0.30:
 
-    0.30  4 Oct 2001
-	- fixed bug with non-existent color names
-	- corrected some typos in and updated the documentation
-	- added multiple color naming schemes
-	- when passed a value in the form of '#000000', returns that value
+    0.31  23 Oct 2002
+	- fixed mispelling of "fuchsia" in HTML.pm
 
 SYNOPSIS
       use Graphics::ColorNames qw( hex2tuple tuple2hex );
@@ -50,7 +47,7 @@ AUTHOR
     Robert Rothenberg <rrwo@cpan.org>
 
 LICENSE
-    Copyright (c) 2001 Robert Rothenberg. All rights reserved. This program
-    is free software; you can redistribute it and/or modify it under the
-    same terms as Perl itself.
+    Copyright (c) 2001-2002 Robert Rothenberg. All rights
+    reserved. This program is free software; you can redistribute it
+    and/or modify it under the same terms as Perl itself.
 

@@ -1,6 +1,6 @@
 use Test;
 
-BEGIN { plan tests => 4, todo => [ ] }
+BEGIN { plan tests => 7, todo => [ ] }
 
 use strict;
 use Carp;
@@ -11,7 +11,7 @@ ok(1);
 tie my %colors, 'Graphics::ColorNames', 'HTML';
 ok(1);
 
-ok(keys %colors, 16);
+ok(keys %colors, 17);
 
 my $count = 0;
 foreach my $name (keys %colors)
@@ -20,3 +20,7 @@ foreach my $name (keys %colors)
     $count++, if (tuple2hex(@RGB) eq $colors{$name} );
   }
 ok($count, keys %colors);
+
+ok(exists($colors{"fuchsia"}));
+ok(exists($colors{"fuscia"}));
+ok($colors{"fuscia"} eq $colors{"fuchsia"});
