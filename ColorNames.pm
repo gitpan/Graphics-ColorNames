@@ -10,7 +10,7 @@ use Carp;
 
 @ISA = qw( Exporter );
 
-$VERSION   = '0.31';
+$VERSION   = '0.32';
 
 @EXPORT    = qw( );
 @EXPORT_OK = qw( hex2tuple tuple2hex );
@@ -302,16 +302,24 @@ Graphics::ColorNames::Mozilla module.
 
 Robert Rothenberg <rrwo@cpan.org>
 
-=head1 ACKNOWLEDGEMENTS
+=head2 Acknowledgements
 
 Alan D. Salewski <alans@cji.com> for feedback and the addition of
 C<tuple2hex>.
 
 Steve Pomeroy <xavier@cpan.org> for pointing out invalid color
-definitions in C<X.pm> v1.02.
+definitions in L<X.pm> v1.02.
 
 <chemboy@perlmonk.org> who pointed out a mispelling of "fuchsia" in
 the HTML color space <https://rt.cpan.org/Ticket/Display.html?id=1704>.
+
+<magnus@mbox604.swipnet.se> who pointed out mispellings and naming
+inconsistencies.
+
+=head2 Suggestions and Bug Reporting
+
+Feedback is always welcome.  Please use the CPAN Request Tracker at
+L<http://rt.cpan.org> to submit bugs reports.
 
 =head1 LICENSE
 

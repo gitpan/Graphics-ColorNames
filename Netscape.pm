@@ -15,16 +15,26 @@ Graphics::ColorNames::Netscape - Netscape 1.1 Color Names
 
 This module defines color names and their associated RGB values associated
 with Netscape 1.1 (I cannot determine whether they were once usable in
-Netscape or were arbitrary names for RGB values-- many of these names are
-not recognized by later versions of Netscape).
+Netscape or were arbitrary names for RGB values-- I<many of these names are
+not recognized by later versions of Netscape>).
+
+=head2 Inconsistencies
+
+Note that the colors "gold", "lightblue" and "mediumblue" are the
+same. This is because the reference Netscape page (below) shows those
+RGB values. (As of December 2002, the page is still on-line.)
 
 =head1 SEE ALSO
 
-C<Graphics::ColorNames>, http://home1.netscape.com/home/bg/colorindex.html
+L<Graphics::ColorNames>, L<http://home1.netscape.com/home/bg/colorindex.html>
 
 =head1 AUTHOR
 
 Robert Rothenberg <rrwo@cpan.org>
+
+=head2 Acknowledgements
+
+<magnus@mbox604.swipnet.se> who pointed out Inconsistencies
 
 =cut
 
@@ -34,7 +44,7 @@ use strict;
 
 use vars qw( $VERSION );
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 # See http://home1.netscape.com/home/bg/colorindex.html
 

@@ -16,10 +16,13 @@ REQUIREMENTS
       make install
 
 HISTORY
-    Revision history since v0.30:
+    Revision history since v0.31:
 
-    0.31  23 Oct 2002
-	- fixed mispelling of "fuchsia" in HTML.pm
+    0.32   5 Dec 2002
+	- fixed inconsistencies with grey/gray spellings in X.pm
+	- added note in POD about using rt.cpan.org for bug reports
+	- minor changes in POD for Netscape.pm
+        - added TODO file
 
 SYNOPSIS
       use Graphics::ColorNames qw( hex2tuple tuple2hex );
