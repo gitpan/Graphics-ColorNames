@@ -1,5 +1,8 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+0.21  12 Mar 2001
+	- fixed an issue with Test::Harness expecting t/*.t tests
+
 0.20  11 Mar 2001
 	- no longer a Tie::Hash
 	- additional example in POD

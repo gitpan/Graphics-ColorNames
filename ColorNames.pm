@@ -11,7 +11,8 @@ use Carp;
 
 @ISA = qw( Exporter );
 
-$VERSION   = '0.20';
+$VERSION   = '0.21';
+
 @EXPORT    = qw( );
 @EXPORT_OK = qw( hex2tuple tuple2hex );
 

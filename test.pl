@@ -1,8 +1,9 @@
 use Test::Harness;
 
 runtests qw(
-  t/ColorNames.pl
-  t/X.pl
-  t/HTML.pl
-  t/Windows.pl
+  t/ColorNames.t
+  t/X.t
+  t/HTML.t
+  t/Windows.t
 );
+

@@ -4,10 +4,10 @@ HTML.pm
 Makefile.PL
 MANIFEST
 README
-t/ColorNames.pl
-t/HTML.pl
-t/Windows.pl
-t/X.pl
+t/ColorNames.t
+t/HTML.t
+t/Windows.t
+t/X.t
 test.pl
 Windows.pm
 X.pm
