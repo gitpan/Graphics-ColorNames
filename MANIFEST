@@ -5,6 +5,7 @@ MANIFEST
 META.yml
 README
 t/01-ColorNames.t
+t/01-ColourNames.t
 t/02-X.t
 t/03-HTML.t
 t/04-Windows.t
@@ -17,4 +18,5 @@ lib/Graphics/ColorNames/HTML.pm
 lib/Graphics/ColorNames/Netscape.pm
 lib/Graphics/ColorNames/Windows.pm
 lib/Graphics/ColorNames/X.pm
+lib/Graphics/ColourNames.pm
 

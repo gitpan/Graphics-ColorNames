@@ -1,5 +1,9 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+1.02    Tue Aug 24 2004
+	- added Graphics::ColourNames alias
+	- minor changes to ColorNames.pm
+
 1.01    Wed Aug 18 2004
 	- corrected typo in REQUIREMENTS (wrong Perl version)
 	- uses Module::Load for improved dynamic loading

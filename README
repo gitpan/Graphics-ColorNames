@@ -49,13 +49,11 @@ DESCRIPTION
     module's POD.
 
 HISTORY
-    Revision history since v1.00:
+    Revision history since v1.01:
 
-    1.01    Wed Aug 18 2004
-	- corrected typo in REQUIREMENTS (wrong Perl version)
-	- uses Module::Load for improved dynamic loading
-	- EXISTS works across multiple color schemes
-	- bug in FETCH that returned key has been fixed
+    1.02    Tue Aug 24 2004
+	- added Graphics::ColourNames alias
+	- minor changes to ColorNames.pm
 
     A more detailed revision history is available in the Changes file.
 

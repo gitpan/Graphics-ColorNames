@@ -11,7 +11,7 @@ use Module::Load;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '1.01';
+our $VERSION   = '1.02';
 # $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );
@@ -61,7 +61,7 @@ sub _load_scheme
     my $self   = shift;
     my $scheme = shift;
 
-    my $module = "Graphics\:\:ColorNames\:\:$scheme";
+    my $module = join('::', __PACKAGE__, $scheme);
     eval {
       load $module;
     };
