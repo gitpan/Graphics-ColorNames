@@ -49,6 +49,9 @@ DESCRIPTION
 HISTORY
     Revision history since v0.32:
 
+    0.39_04 Mon Jul 26 2004
+	- rebuilt distribution with proper META.yml
+
     0.39_03 22 Jul 2004
 	- added required rgb.txt for tests to MANIFEST and distro
 
