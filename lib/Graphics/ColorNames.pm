@@ -11,7 +11,7 @@ use Module::Load;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '1.03';
+our $VERSION   = '1.04';
 # $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );
@@ -21,15 +21,19 @@ sub _load_file {
   my $self = shift;
   my $file = shift;
 
-  unless (-r $file) {
-    croak "Cannot load scheme from file: \'$file\'";
+  unless (ref($file)) {
+    unless (-r $file) {
+      croak "Cannot load scheme from file: \'$file\'";
+    }
   }
 
   my $colors = { };
 
-  my $fh = new IO::File;
-  open($fh, $file)
-    or croak "Cannot open file: \'$file\'";
+  my $fh = ref($file) ? $file : (new IO::File);
+  unless (ref($file)) {
+    open($fh, $file)
+      or croak "Cannot open file: \'$file\'";
+  }
 
   while (my $line = <$fh>) {
     unless ($line =~ /^[\!\#]/) {
@@ -50,7 +54,9 @@ sub _load_file {
       }
     }
   }
-  close $fh;
+  unless (ref($file)) {
+    close $fh;
+  }
 
   $self->{SCHEMES}->[ $self->{COUNT}++ ] = $colors;
 #  push @{ $self->{SCHEMES} }, $colors;
@@ -291,7 +297,8 @@ The standard interface (prior to version 0.40) is through a tied hash:
   tie %NAMETABLE, 'Graphics::ColorNames', @SCHEME
 
 where C<%NAMETABLE> is the tied hash and C<@SCHEME> is a list of
-L<color schemes|/Color Schemes> or the path to a F<rgb.txt> file.
+L<color schemes|/Color Schemes> or the path to or open filehandle for
+a F<rgb.txt> file.
 
 Multiple schemes can be used:
 
@@ -406,6 +413,9 @@ names.
 
 =back
 
+Rather than a color scheme, the path or open filehandle for a
+F<rgb.txt> file may be specified.
+
 Additional color schemes may be available on CPAN.
 
 =head2 Adding Naming Schemes
@@ -438,6 +448,22 @@ You would use the above schema as follows:
 An example of an additional module is Steve Pomeroy's
 L<Graphics::ColorNames::Mozilla> module.
 
+Since version 1.03, C<NamesRgbTable> may also return a code reference:
+
+  package Graphics::ColorNames::Orange;
+
+  sub NamesRgbTable() {
+    return sub {
+      my $name = shift;
+      return 0xffa500;        
+    };
+  }
+
+See L<Graphics::ColorNames::GrayScale> for an example.
+
+Note that extentions of the form "Graphics::ColourNames::*" are not
+supported.
+
 =head1 SEE ALSO
 
 L<Color::Rgb> has a similar function to this module, but parses an
@@ -459,7 +485,7 @@ Steve Pomeroy <xavier at cpan.org> for pointing out invalid color
 definitions in X color space.
 
 <chemboy at perlmonk.org> who pointed out a mispelling of "fuchsia" in
-the HTML color space <https://rt.cpan.org/Ticket/Display.html?id=1704>.
+the HTML color space L<http://rt.cpan.org/Ticket/Display.html?id=1704>.
 
 <magnus at mbox604.swipnet.se> who pointed out mispellings and naming
 inconsistencies.
