@@ -11,7 +11,7 @@ use Module::Load;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '1.04';
+our $VERSION   = '1.05';
 # $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );

@@ -1,5 +1,9 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+1.05    Fri Sep  3 2004
+	- correction to Graphics::ColourNames
+	- correction to README
+
 1.04    Fri Sep  3 2004
 	- updates to POD
 	- a filehandle for a rgb.txt file can be specified
