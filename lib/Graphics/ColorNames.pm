@@ -6,33 +6,71 @@ use strict;
 use warnings;
 
 use Carp;
-use IO::File;
 use Module::Load;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '1.06';
-# $VERSION = eval $VERSION;
+our $VERSION   = '2.0_01';
+$VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );
-our @EXPORT_OK = qw( hex2tuple tuple2hex );
+our @EXPORT_OK = qw( hex2tuple tuple2hex all_schemes );
 
-sub _load_file {
-  my $self = shift;
-  my $file = shift;
+{
+  # We store Schemes in a hash as a quick-and-dirty way to filter
+  # duplicates (which sometimes occur when fidrectories are repeated
+  # in @INC or via symlinks).  The order does not matter.
 
-  unless (ref($file)) {
-    unless (-r $file) {
-      croak "Cannot load scheme from file: \'$file\'";
+  my %Schemes = ( );
+
+  sub _find_schemes {
+
+    my $path = shift;
+
+    # BUG: deep-named schemes such as Graphics::ColorNames::Foo::Bar
+    # are not supported.
+
+    if (-d $path) {
+      my $dh = new DirHandle $path
+	|| croak "Unable to access directory $path";
+      while (defined(my $fn = $dh->read)) {
+	if ((-r File::Spec->catdir($path, $fn)) && ($fn =~ /(.+)\.pm$/)) {
+	  $Schemes{$1}++;
+	}
+      }
     }
   }
 
-  my $colors = { };
+  sub all_schemes {
+    unless (%Schemes) {
+
+      load DirHandle;  # These only need to be loaded once
+      load File::Spec;
+
+      foreach my $dir (@INC) {
+	_find_schemes(
+	  File::Spec->catdir($dir, split(/::/, __PACKAGE__)));
+      }
+    }
+    return (keys %Schemes);
+  }
+}
+
+sub _load_scheme_from_file {
+  my $self = shift;
+  my $file = shift;
+
+  unless (ref $file) {
+    unless (-r $file) {
+      croak "Cannot load scheme from file: \'$file\'";
+    }
+    load IO::File;
+  }
 
   my $fh = ref($file) ? $file : (new IO::File);
-  unless (ref($file)) {
+  unless (ref $file) {
     open($fh, $file)
-      or croak "Cannot open file: \'$file\'";
+      || croak "Cannot open file: \'$file\'";
   }
 
   while (my $line = <$fh>) {
@@ -40,135 +78,151 @@ sub _load_file {
       chomp($line);
       if ($line) {
 	my ($red, $green, $blue, $name, $rgb);
-	$red   = eval substr($line,  0, 3);
-	$green = eval substr($line,  4, 3);
-	$blue  = eval substr($line,  8, 3);
 
-	$rgb   = ($red << 16) | ($green << 8) | ($blue);
-
-	$name  = substr($line, 12);
-	$name =~ s/^\s+//; # remove leading and trailing spaces
+	$name  = lc(substr($line, 12));
+	$name =~ s/^\s+//;	# remove leading and trailing spaces
 	$name =~ s/\s+$//;
 
-	$colors->{lc($name)} = $rgb;
+	# TODO? Should we add an option to warn if overlapping names
+	# are defined? This seems to be too common to be useful.
+
+	unless (defined $self->{NAMES}->{$name}) {
+
+	  $red   = eval substr($line,  0, 3);
+	  $green = eval substr($line,  4, 3);
+	  $blue  = eval substr($line,  8, 3);
+
+	  $rgb   = ($red << 16) | ($green << 8) | ($blue);
+
+	  $self->{NAMES}->{$name} = $rgb;
+	}
       }
     }
   }
-  unless (ref($file)) {
+  unless (ref $file) {
     close $fh;
   }
-
-  $self->{SCHEMES}->[ $self->{COUNT}++ ] = $colors;
-#  push @{ $self->{SCHEMES} }, $colors;
 }
 
-sub _load_scheme
+sub _load_scheme_from_module {
+  my $self   = shift;
+  my $scheme = shift;
+
+  my $module = join('::', __PACKAGE__, $scheme);
+  eval { load $module; };
+  if ($@) {
+    $module = $scheme;
+    eval { load $module; };
+    if ($@) {
+      croak "Cannot load color naming scheme \`$scheme\'";
+    }
+  }
+    
   {
-    my $self   = shift;
-    my $scheme = shift;
+    no strict 'refs';
+    $self->load_scheme($module->NamesRgbTable);   
+  }
+}
 
-    # Should this be switched to use Module::Pluggable? Hm....
+sub load_scheme {
+  my $self   = shift;
+  my $scheme = shift;
 
-    my $module = join('::', __PACKAGE__, $scheme);
+  if (ref($scheme) eq 'HASH') {
+    foreach my $name (keys %$scheme) {
+      $self->{NAMES}->{lc($name)} = $scheme->{$name},
+	unless (defined $self->{NAMES}->{lc($name)});
+    }
+  }
+  elsif (ref($scheme) eq 'CODE') {
+    push @{ $self->{SCHEMES} }, $scheme;
+  }
+  else {
     eval {
-      load $module;
-    };
-    if ($@)
-      {
-	croak "Cannot load color naming scheme \`$scheme\'";
+      if ((ref($scheme) eq 'GLOB') || $scheme->isa('IO::File')
+                                   || $scheme->isa('FileHandle')) {
+	$self->_load_scheme_from_file($scheme);
       }
-    else
-      {
-	no strict 'refs';
-        $self->{SCHEMES}->[ $self->{COUNT}++ ] = $module->NamesRgbTable();
+    };
+    if ($!) {
+      croak "unsupported scheme type: ", ref($scheme);
+    }
+  }
+}
+
+sub TIEHASH {
+  my $class = shift;
+
+  my $self  = {
+    NAMES   => { },
+    SCHEMES => [ ], # a list of naming schemes, in priority search order
+  };
+
+  bless $self, $class;
+
+  if (@_) {
+    foreach my $scheme (@_) {
+      if (ref $scheme) {
+	$self->load_scheme( $scheme );
+      }
+      elsif (-r $scheme) {
+	$self->_load_scheme_from_file( $scheme );
+      }
+      else {
+	$self->_load_scheme_from_module( $scheme );
       }
     }
+  } else {
+    $self->_load_scheme_from_module('X');
+  }
 
-sub TIEHASH
-  {
-    my $class = shift;
+  return $self;
+}
 
-    my $self  = {
-      SCHEMES => [ ], # a list of naming schemes, in priority search order
-      COUNT   => 0,
-    };
+sub FETCH {
+  my $self   = shift;
+  my $key    = lc(shift);
 
-    bless $self, $class;
+  # If we're passing it an RGB value, return that value
 
-    if (@_) {
-      foreach my $scheme (@_) {
-	if (-e $scheme) {
-	  $self->_load_file( $scheme );
+  if ($key =~ m/^\x23?([\da-f]{6})$/i) {
+    return $1;
+  } else {
+    my $value = $self->{NAMES}->{$key};
+    unless (defined $value) {
+      my @schemes = @{ $self->{SCHEMES} };
+      while ((!defined $value) && (my $scheme = shift @schemes)) {
+	if ((ref $scheme) eq 'CODE') {
+	  $value = &$scheme($key);
+	}
+	elsif ((ref $scheme) eq 'HASH') {
+	  $value = $scheme->{$key};
 	}
 	else {
-	  $self->_load_scheme( $scheme );
+	  # This shouldn't be called
+	  croak "unsupported scheme type: ", ref($scheme);
 	}
       }
     }
-    else {
-      $self->_load_scheme( 'X' );
-    }
-
-    return $self;
-  }
-
-sub FETCH
-  {
-    my ($self, $key) = @_;
-
-    my $value;
-    if ($key =~ m/^\x23?[\da-f]{6}$/i)
-      {
-	$value =  $key;
-	$value =~ s/\x23//;
-      }
-    else
-      {
-	my $i = 0;
-	while ( (!defined $value) and ($i < $self->{COUNT}) )
-	  {
-	    my $scheme = $self->{SCHEMES}->[$i++];
-	    my $type   = ref($scheme);
-	    if ($type eq 'HASH') {
-	      $value = $scheme->{ lc($key) };
-	    }
-	    elsif ($type eq 'CODE') {
-	      $value = &$scheme(lc($key));
-	    }
-	    else {
-	      croak "Unsupported scheme type: ", $type;
-	    }
-	  }
-	$value = sprintf( '%06x', $value ), if (defined $value);
-      }
+    $value = sprintf('%06x', $value ), if (defined $value);
     return $value;
   }
+}
 
-sub EXISTS
-  {
-    my ($self, $key) = @_;
-    defined ($self->FETCH($key));
-  }
+sub EXISTS {
+  my ($self, $key) = @_;
+  defined ($self->FETCH($key));
+}
 
-sub FIRSTKEY
-  {
-    my $self = shift;
-    my $scheme = $self->{SCHEMES}->[0];
-    if (ref($scheme) ne 'HASH') {
-      croak "Scheme is not a hash";
-    }
-    each %{$self->{SCHEMES}->[0]};
-  }
+sub FIRSTKEY {
+  my $self = shift;
+  each %{$self->{NAMES}};
+}
 
-sub NEXTKEY
-  {
-    my $self = shift;
-    my $scheme = $self->{SCHEMES}->[0];
-    if (ref($scheme) ne 'HASH') {
-      croak "Scheme is not a hash";
-    }
-    each %{$self->{SCHEMES}->[0]};
-  }
+sub NEXTKEY {
+  my $self = shift;
+  each %{$self->{NAMES}};
+}
 
 sub hex {
     my $self = shift;
@@ -187,43 +241,39 @@ sub rgb {
     return wantarray ? @rgb : join($sep,@rgb);
 }
 
-sub hex2tuple
-
 # Convert 6-digit hexidecimal code (used for HTML etc.) to an array of
 # RGB values
 
-  {
-    my $rgb = CORE::hex( shift );
-    my ($red, $green, $blue);
-    $blue  = ($rgb & 0x0000ff);
-    $green = ($rgb & 0x00ff00) >> 8;
-    $red   = ($rgb & 0xff0000) >> 16;
-    return ($red, $green, $blue);
-  }
+sub hex2tuple {
+  my $rgb = CORE::hex( shift );
+  my ($red, $green, $blue);
+  $blue  = ($rgb & 0x0000ff);
+  $green = ($rgb & 0x00ff00) >> 8;
+  $red   = ($rgb & 0xff0000) >> 16;
+  return ($red, $green, $blue);
+}
 
-sub tuple2hex
 
 # Convert list of RGB values to 6-digit hexidecimal code (used for HTML, etc.)
-  {
-    my ($red, $green, $blue) = @_;
-    my $rgb = sprintf "%.2x%.2x%.2x", $red, $green, $blue;
-    return $rgb;
-  }
 
-sub _readonly_error
-  {
-    croak "Cannot modify a read-only value";
-  }
+sub tuple2hex {
+  my ($red, $green, $blue) = @_;
+  my $rgb = sprintf "%.2x%.2x%.2x", $red, $green, $blue;
+  return $rgb;
+}
 
-BEGIN
-  {
-    no strict 'refs';
-    *STORE  = \ &_readonly_error;
-    *DELETE = \ &_readonly_error;
-    *CLEAR  = \ &_readonly_error; # causes problems with 'undef'
+sub _readonly_error {
+  croak "Cannot modify a read-only value";
+}
 
-    *new    = \ &TIEHASH;
-  }
+BEGIN {
+  no strict 'refs';
+  *STORE  = \ &_readonly_error;
+  *DELETE = \ &_readonly_error;
+  *CLEAR  = \ &_readonly_error; # causes problems with 'undef'
+
+  *new    = \ &TIEHASH;
+}
 
 1;
 
@@ -240,46 +290,37 @@ following non-standard modules:
 
   Module::Load
 
-=head2 Installation
-
-Installation is pretty standard:
-
-  perl Makefile.PL
-  make
-  make test
-  make install
-
 =head1 SYNOPSIS
 
   use Graphics::ColorNames qw( hex2tuple tuple2hex );
 
-  tie %NameTable, 'Graphics::ColorNames', 'X';
+  tie %ColorTable, 'Graphics::ColorNames', 'X';
 
-  my $rgbhex1 = $NameTable{'green'};    # returns '00ff00'
-  my $rgbhex2 = tuple2hex( 0, 255, 0 ); # returns '00ff00'
-  my @rgbtup  = hex2tuple( $rgbhex );   # returns (0, 255, 0)
+  $rgbhex1 = $ColorTable{'green'};    # returns '00ff00'
+  $rgbhex2 = tuple2hex( 0, 255, 0 );  # returns '00ff00'
+  @rgbtup  = hex2tuple( $rgbhex );    # returns (0, 255, 0)
 
-  my $rgbhex3 = $NameTable{'#123abc'};  # returns '123abc'
-  my $rgbhex4 = $NameTable{'123abc'};   # returns '123abc'
+  $rgbhex3 = $ColorTable{'#123abc'};  # returns '123abc'
+  $rgbhex4 = $ColorTable{'123abc'};   # returns '123abc'
 
 =head1 DESCRIPTION
 
-This module defines RGB values for common color names. The intention is to
-(1) provide a common module that authors can use with other modules to
-specify colors; and (2) free module authors from having to "re-invent the
-wheel" whenever they decide to give the users the option of specifying a
-color by name rather than RGB value.
+This module defines RGB values for common color names. The intention
+is to (1) provide a common module that authors can use with other
+modules to specify colors by name; and (2) free module authors from
+having to "re-invent the wheel" whenever they decide to give the users
+the option of specifying a color by name rather than RGB value.
 
 For example,
 
   use Graphics::ColorNames 'hex2tuple';
-  tie %COLORS, 'Graphics::ColorNames';
+  tie %ColorTable, 'Graphics::ColorNames';
 
   use GD;
 
   $img = new GD::Image(100, 100);
 
-  $bgColor = $img->colorAllocate( hex2tuple( $COLORS{'CadetBlue3'} ) );
+  $bgColor = $img->colorAllocate( hex2tuple( $ColorTable{'CadetBlue3'} ) );
 
 Though a little 'bureaucratic', the meaning of this code is clearer:
 C<$bgColor> (or background color) is 'CadetBlue3' (which is easier to for one
@@ -290,29 +331,42 @@ the background color, the variable name need not be changed.
 As an added feature, a hexidecimal RGB value in the form of #RRGGBB or
 RRGGBB will return itself:
 
-  my $rgbhex3 = $NameTable{'#123abc'};  # returns '123abc'
+  my $rgbhex3 = $ColorTable{'#123abc'};  # returns '123abc'
 
 =head2 Tied Interface
 
 The standard interface (prior to version 0.40) is through a tied hash:
 
-  tie %NAMETABLE, 'Graphics::ColorNames', @SCHEME
+  tie %NameTable, 'Graphics::ColorNames', @SchemeList;
 
-where C<%NAMETABLE> is the tied hash and C<@SCHEME> is a list of
-L<color schemes|/Color Schemes> or the path to or open filehandle for
-a F<rgb.txt> file.
+where C<%NameTable> is the tied hash and C<@SchemeList> is a list of
+L<color schemes|/Color Schemes>.
+
+A valid color scheme may be the name of a color scheme (such as C<X>
+or a full module name such as C<Graphics::ColorNames::X>), a reference
+to a color scheme hash or subroutine, or to the path or open
+filehandle for a F<rgb.txt> file.
 
 Multiple schemes can be used:
 
-  tie %COLORS, 'Graphics::ColorNames', qw(HTML Windows Netscape);
+  tie %NameTable, 'Graphics::ColorNames', qw(HTML Netscape);
 
-In this case, if the name is not a valid HTML color, the Windows
-name will be used; if it is not a valid Windows name, then the
-Netscape name will be used.
+In this case, if the name is not a valid HTML color, the Netscape name
+will be used.
 
-RGB values can be retrieved with a case-insensitive hash key:
+One can load all available schemes (as of version 2.0):
 
-  $rgb = $colors{'AliceBlue'};
+  use Graphics::ColorNames 2.0, 'all_schemes';
+  tie %NameTable, 'Graphics::ColorNames', all_schemes();
+
+When multiple color schemes define the same name, then the earlier one
+listed has priority (however, hash-based color schemes always have
+priority over code-based color schemes).
+
+When no color scheme is specified, the X-Windows scheme is assumed.
+
+Color names are case insensitive.  So "AliceBlue" returns the same
+value as "aliceblue", "ALICEBLUE" and "alICEblue".
 
 The value returned is in the six-digit hexidecimal format used in HTML and
 CSS (without the initial '#'). To convert it to separate red, green, and
@@ -322,10 +376,11 @@ blue values (between 0 and 255), use the L</hex2tuple> function.
 
 If you prefer, an object-oriented interface is available:
 
+  use Graphics::ColorNames 0.40;
+
   $obj = Graphics::ColorNames->new('/etc/rgb.txt');
 
   $hex = $obj->hex('skyblue'); # returns "87ceeb"
-
   @rgb = $obj->rgb('skyblue'); # returns (0x87, 0xce, 0xeb)
 
 The interface is similar to the L<Color::Rgb> module:
@@ -338,6 +393,12 @@ The interface is similar to the L<Color::Rgb> module:
 
 Creates the object, using the default L<color schemes|/Color Schemes>.
 If none are specified, it uses the C<X> scheme.
+
+=item load_scheme
+
+  $obj->load_scheme( $scheme );
+
+Loads a scheme dynamically.  The scheme may be any hash or code reference.
 
 =item hex
 
@@ -371,9 +432,18 @@ optional separator (which defauls to a comma).  For example,
 These functions are not exported by default, so much be specified to
 be used:
 
-  use Graphics::ColorNames qw( hex2tuple tuple2hex );
+  use Graphics::ColorNames qw( all_schemes hex2tuple tuple2hex );
 
 =over
+
+=item all_schemes
+
+  @schemes = all_schemes();
+
+Returns a list of all available color schemes installed on the machine
+in the F<Graphics::ColorNames> namespace.
+
+The order has no significance.
 
 =item hex2tuple
 
@@ -393,13 +463,13 @@ The following schemes are available by default:
 
 =item X
 
-About 750 color names used in X-Windows. I<This is the default naming
-scheme>, since it provides the most names.
+About 750 color names used in X-Windows.
 
 =item HTML
 
-16 common color names defined in the HTML 4.0 specification. These names
-are also used with CSS and SVG.
+16 common color names defined in the HTML 4.0 specification. These
+names are also used with older CSS and SVG specifications. (You may
+want to see L<Graphics::ColorNames::SVG> for a complete list.)
 
 =item Netscape
 
@@ -412,9 +482,9 @@ separate module.
 
 =item Windows
 
-16 commom color names used with Microsoft Windows and related products.
-These are actually the same colors as C<HTML>, although with different
-names.
+16 commom color names used with Microsoft Windows and related
+products.  These are actually the same colors as the L</HTML> scheme,
+although with different names.
 
 =back
 
@@ -450,8 +520,8 @@ You would use the above schema as follows:
 
   tie %colors, 'Graphics::ColorNames', 'Metallic';
 
-An example of an additional module is Steve Pomeroy's
-L<Graphics::ColorNames::Mozilla> module.
+An example of an additional module is the L<Graphics::ColorNames::Mozilla>
+module by Steve Pomeroy.
 
 Since version 1.03, C<NamesRgbTable> may also return a code reference:
 
@@ -467,7 +537,10 @@ Since version 1.03, C<NamesRgbTable> may also return a code reference:
 See L<Graphics::ColorNames::GrayScale> for an example.
 
 Note that extentions of the form "Graphics::ColourNames::*" are not
-supported.
+supported at this time, although full scheme module names can be
+specified:
+
+  tie %NameTable, 'Graphics::ColourNames', 'Graphics::ColourNames::Scheme';
 
 =head1 SEE ALSO
 
@@ -476,16 +549,6 @@ F<rgb.txt> file.
 
 L<Graphics::ColorObject> can convert between RGB and other color space
 types.
-
-=head1 DSLIP
-
-  R - Released
-  d - Developer
-  p - Perl-only
-  h - Hybrid interface
-  p - Standard Perl
-
-See L<http://cpan.uwinnipeg.ca/htdocs/faqs/dslip.html>
 
 =head1 AUTHOR
 

@@ -1,15 +1,11 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 6;
+use Test::More tests => 1;
 
-eval "use Pod::Coverage";
+eval "use Test::Pod::Coverage";
 
-plan skip_all => "Pod::Coverage required" if $@;
+plan skip_all => "Test::Pod::Coverage required" if $@;
 
-ok( Pod::Coverage->new( package => 'Graphics::ColorNames' ) );
-ok( Pod::Coverage->new( package => 'Graphics::ColourNames' ) );
-ok( Pod::Coverage->new( package => 'Graphics::ColorNames::X' ) );
-ok( Pod::Coverage->new( package => 'Graphics::ColorNames::HTML' ) );
-ok( Pod::Coverage->new( package => 'Graphics::ColorNames::Windows' ) );
-ok( Pod::Coverage->new( package => 'Graphics::ColorNames::Netscape' ) );
+pod_coverage_ok("Graphics::ColorNames");
+

@@ -9,10 +9,15 @@ require Graphics::ColorNames;
 
 use base 'Graphics::ColorNames';
 
-our $VERSION = '1.06';
+our $VERSION = '2.0_01';
+$VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );
-our @EXPORT_OK = qw( hex2tuple tuple2hex );
+our @EXPORT_OK = qw( hex2tuple tuple2hex all_schemes );
+
+sub all_schemes {
+  goto &Graphics::ColorNames::all_schemes;
+}
 
 sub hex2tuple {
   goto &Graphics::ColorNames::hex2tuple;

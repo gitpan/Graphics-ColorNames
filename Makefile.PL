@@ -6,6 +6,9 @@ WriteMakefile
           'VERSION_FROM' => 'lib/Graphics/ColorNames.pm',
           'PREREQ_PM' => {
                            'Carp' => '0',
+                           'DirHandle' => '0',
+                           'File::Spec' => '0',
+                           'FileHandle' => '0',
                            'IO::File' => '0',
                            'Module::Load' => '0.1',
                            'Test::More' => '0',

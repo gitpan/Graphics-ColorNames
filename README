@@ -51,14 +51,23 @@ DESCRIPTION
 HISTORY
     Revision history since the last release:
 
-    1.06 Tue Mar 29 2005
-	- cleaned up tests
-	- added DSLIP information to POD
-	- added Test::Pod tests
-        - added Pod::Coverage tests
-	- minor documentation changes
-	- uses Test::Prereq to test distro prereqs
-	- added SIGNATURE to distribution
+    2.0_01  Mon Apr  4 2005
+	- removed DSLIP information from POD, since it has little meaning
+	- tweaked code
+	- color scheme can be a module name
+	- fixed bug in Pod::Coverage test, uses Test::Pod::Coverage
+	* major change in how schemes are stored, which affects priority
+	  when CODE scheme types are used
+	- can load rgb.txt from GLOB, FileHandle or IO::File
+	- references can be specified as possible schemes in constructor
+	- added public load_scheme method
+	- various optimizations and tweaks
+	- IO::File is loaded only as needed
+	- rgb.txt file must be radable to be loaded
+	- tweaked tests
+	- RGB passthrough now consistently returns lowercase values
+	- minor optimization in FETCH for RGB passthrough
+	- added all_schemes function to query schemes
 
     A more detailed revision history is available in the Changes file.
 
