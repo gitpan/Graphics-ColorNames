@@ -1,5 +1,9 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+1.00    Sat Jul 31 2004
+	- changed version to 1.00 as release appears to be stable
+	- corrected bad link in POD
+
 0.39_04 Mon Jul 26 2004
 	- rebuilt distribution with proper META.yml
 

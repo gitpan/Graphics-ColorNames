@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Graphics-ColorNames
-version: 0.39_04
+version: 1.00
 author:
   - Robert Rothenberg <rrwo at cpan.org>
 abstract: defines RGB values for common color names
@@ -15,7 +15,7 @@ build_requires:
 provides:
   Graphics::ColorNames:
     file: lib/Graphics/ColorNames.pm
-    version: 0.39_04
+    version: 1.00
   Graphics::ColorNames::HTML:
     file: lib/Graphics/ColorNames/HTML.pm
     version: 1.11

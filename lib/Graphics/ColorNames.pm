@@ -10,8 +10,8 @@ use IO::File;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '0.39_04';
-$VERSION = eval $VERSION;
+our $VERSION   = '1.00';
+# $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );
 our @EXPORT_OK = qw( hex2tuple tuple2hex );
@@ -433,7 +433,7 @@ Alan D. Salewski <alans at cji.com> for feedback and the addition of
 C<tuple2hex>.
 
 Steve Pomeroy <xavier at cpan.org> for pointing out invalid color
-definitions in L<X.pm> v1.02.
+definitions in X color space.
 
 <chemboy at perlmonk.org> who pointed out a mispelling of "fuchsia" in
 the HTML color space <https://rt.cpan.org/Ticket/Display.html?id=1704>.
