@@ -16,22 +16,25 @@ REQUIREMENTS
       make install
 
 HISTORY
-    Revision history since v0.23:
+    Revision history since v0.24:
 
-    0.24  28 Apr 2001
-	- fixed  colors in X.pm (such as some 'green') defined as 0x000000
-	- removed duplicate grays (ie, 'gray0') from X.pm
-	- renamed test suite files to enforce testing order
-	- v0.23 mistakenly dated 17 March instead of 17 April 2001
+    0.30  4 Oct 2001
+	- fixed bug with non-existent color names
+	- corrected some typos in and updated the documentation
+	- added multiple color naming schemes
+	- when passed a value in the form of '#000000', returns that value
 
 SYNOPSIS
       use Graphics::ColorNames qw( hex2tuple tuple2hex );
 
       tie %NameTable, 'Graphics::ColorNames', 'X';
 
-      my $rgbhex = $NameTable{'green'};    # returns '00ff00'
-      my $rgbhex = tuple2hex( 0, 255, 0 )  # returns '00ff00'
-      my @rgbtup = hex2tuple( $rgbhex );   # returns (0, 255, 0)
+      my $rgbhex1 = $NameTable{'green'};    # returns '00ff00'
+      my $rgbhex2 = tuple2hex( 0, 255, 0 ); # returns '00ff00'
+      my @rgbtup  = hex2tuple( $rgbhex );   # returns (0, 255, 0)
+
+      my $rgbhex3 = $NameTable{'#123abc'};  # returns '123abc'
+      my $rgbhex4 = $NameTable{'123abc'};   # returns '123abc'
 
 DESCRIPTION
     This module defines RGB values for common color names. The intention is

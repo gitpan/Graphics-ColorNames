@@ -3,7 +3,6 @@ package Graphics::ColorNames;
 require 5.005;
 
 use strict;
-# use warnings;
 
 use vars qw( @ISA $VERSION @EXPORT @EXPORT_OK );
 
@@ -11,10 +10,29 @@ use Carp;
 
 @ISA = qw( Exporter );
 
-$VERSION   = '0.24';
+$VERSION   = '0.30';
 
 @EXPORT    = qw( );
 @EXPORT_OK = qw( hex2tuple tuple2hex );
+
+sub _load_scheme
+  {
+    my $self   = shift;
+
+    my $scheme = shift;
+
+    my $module = "Graphics\:\:ColorNames\:\:$scheme";
+    eval "require $module;";
+    if ($@)
+      {
+	croak "Cannot load color naming scheme \`$scheme\'";
+      }
+    else
+      {
+	no strict 'refs';
+	push @{ $self->{SCHEMES} }, $module->NamesRgbTable();
+      }
+    }
 
 sub TIEHASH
   {
@@ -24,36 +42,43 @@ sub TIEHASH
       SCHEMES => [ ], # a list of naming schemes, in priority search order
     };
 
-    # To-do: eventually use "foreach my $scheme (@_)"
-    my $scheme = shift || 'X';
-    {
-	my $module = "Graphics\:\:ColorNames\:\:$scheme";
-	eval "require $module;";
-	if ($@)
-	  {
-	    croak "Cannot load color naming scheme \`$scheme\'";
-	  }
-	else
-	  {
-	    no strict 'refs';
-	    push @{ $self->{SCHEMES} }, $module->NamesRgbTable();
-
-	  }
-
-      }
-
-    if (shift)
-      {
-	croak "Cannot handle multiple color naming schemes";
-      }
-
     bless $self, $class;
+
+    if (@_)
+      {
+	foreach my $scheme (@_)
+	  {
+	    $self->_load_scheme( $scheme );
+	  }
+      }
+    else
+      {
+	$self->_load_scheme( 'X' );
+      }
+
+    return $self;
   }
 
 sub FETCH
   {
     my ($self, $key) = @_;
-    sprintf( '%06x', $self->{SCHEMES}->[0]->{ lc($key) } );
+
+    my $value;
+    if ($key =~ m/\x23?[\da-f]{6}/i)
+      {
+	$value =  $key;
+	$value =~ s/\x23//;
+      }
+    else
+      {
+	my $i = 0;
+	while ( (!defined $value) and (defined $self->{SCHEMES}->[$i]) )
+	  {
+	    $value = $self->{SCHEMES}->[$i++]->{ lc($key) };
+	  }
+	$value = sprintf( '%06x', $value ), if (defined $value);
+      }
+    return $value;
   }
 
 sub EXISTS
@@ -140,9 +165,12 @@ Installation is pretty standard:
 
   tie %NameTable, 'Graphics::ColorNames', 'X';
 
-  my $rgbhex = $NameTable{'green'};    # returns '00ff00'
-  my $rgbhex = tuple2hex( 0, 255, 0 )  # returns '00ff00'
-  my @rgbtup = hex2tuple( $rgbhex );   # returns (0, 255, 0)
+  my $rgbhex1 = $NameTable{'green'};    # returns '00ff00'
+  my $rgbhex2 = tuple2hex( 0, 255, 0 ); # returns '00ff00'
+  my @rgbtup  = hex2tuple( $rgbhex );   # returns (0, 255, 0)
+
+  my $rgbhex3 = $NameTable{'#123abc'};  # returns '123abc'
+  my $rgbhex4 = $NameTable{'123abc'};   # returns '123abc'
 
 =head1 DESCRIPTION
 
@@ -169,14 +197,21 @@ to understand than C<0x7A, 0xC5, 0xCD>). The variable is named for its
 function, not form (ie, C<$CadetBlue3>) so that if the author later changes
 the background color, the variable name need not be changed.
 
+As an added feature, a hexidecimal RGB value in the form of #RRGGBB or
+RRGGBB will return itself:
+
+  my $rgbhex3 = $NameTable{'#123abc'};  # returns '123abc'
+
 =head2 Usage
 
 The interface is through a tied hash:
 
   tie %NAMETABLE, 'Graphics::ColorNames', SCHEME
 
-where C<%NAMETABLE> is the tied hash and C<SCHEME> is the color scheme.
-Currently three schemes are available:
+where C<%NAMETABLE> is the tied hash and C<SCHEME> is the color scheme(s)
+specified.
+
+Currently four schemes are available:
 
 =over
 
@@ -202,6 +237,14 @@ These are actually the same colors as C<HTML>, although with different
 names.
 
 =back
+
+Multiple schemes can be used:
+
+  tie %COLORS, 'Graphics::ColorNames', qw(HTML Windows Netscape);
+
+In this case, if the name is not a valid HTML color, the Windows
+name will be used; if it is not a valid Windows name, then the
+Netscape name will be used.
 
 RGB values can be retrieved with a case-insensitive hash key:
 
