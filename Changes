@@ -1,5 +1,11 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+0.39_01 21 Jul 2004
+	- added Build.PL to distribution
+	- added hex() and rgb() methods
+	- created object-oriented interface
+	- additions and corrections in POD
+
 0.32   5 Dec 2002
 	- fixed inconsistencies with grey/gray spellings in X.pm
 	- added note in POD about using rt.cpan.org for bug reports

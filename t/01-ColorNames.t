@@ -77,3 +77,4 @@ ok($colors3{Brown}, 'a62a2a'); # Brown in Netscape (don't try X)
 
 ok(!defined $colors{NonExistentColorName});
 ok(!exists  $colors{NonExistentColorName});
+

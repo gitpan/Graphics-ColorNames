@@ -10,7 +10,7 @@ use Carp;
 
 @ISA = qw( Exporter );
 
-$VERSION   = '0.32';
+$VERSION   = '0.39_01'; $VERSION = eval $VERSION;
 
 @EXPORT    = qw( );
 @EXPORT_OK = qw( hex2tuple tuple2hex );
@@ -100,13 +100,30 @@ sub NEXTKEY
     each %{$self->{SCHEMES}->[0]};
   }
 
+sub hex {
+    my $self = shift;
+    my $name = shift;
+    my $rgb  = $self->FETCH($name);
+    my $pre  = shift;
+    unless (defined $pre) { $pre = ""; }
+    return ($pre.$rgb);
+}
+
+sub rgb {
+    my $self = shift;
+    my $name = shift;
+    my @rgb  = hex2tuple($self->FETCH($name));
+    my $sep  = shift || ',';
+    return wantarray ? @rgb : join($sep,@rgb);
+}
+
 sub hex2tuple
 
 # Convert 6-digit hexidecimal code (used for HTML etc.) to an array of
 # RGB values
 
   {
-    my $rgb = hex( shift );
+    my $rgb = CORE::hex( shift );
     my ($red, $green, $blue);
     $blue  = ($rgb & 0x0000ff);
     $green = ($rgb & 0x00ff00) >> 8;
@@ -134,6 +151,8 @@ BEGIN
     *STORE  = \ &_readonly_error;
     *DELETE = \ &_readonly_error;
     *CLEAR  = \ &_readonly_error; # causes problems with 'undef'
+
+    *new    = \ &TIEHASH;
   }
 
 1;
@@ -202,14 +221,92 @@ RRGGBB will return itself:
 
   my $rgbhex3 = $NameTable{'#123abc'};  # returns '123abc'
 
-=head2 Usage
+=head2 Tied Interface
 
-The interface is through a tied hash:
+The standard interface (prior to version 0.40) is through a tied hash:
 
-  tie %NAMETABLE, 'Graphics::ColorNames', SCHEME
+  tie %NAMETABLE, 'Graphics::ColorNames', @SCHEME
 
-where C<%NAMETABLE> is the tied hash and C<SCHEME> is the color scheme(s)
-specified.
+where C<%NAMETABLE> is the tied hash and C<@SCHEME> is the
+L<color scheme(s)|/Color Schemes> specified.
+
+Multiple schemes can be used:
+
+  tie %COLORS, 'Graphics::ColorNames', qw(HTML Windows Netscape);
+
+In this case, if the name is not a valid HTML color, the Windows
+name will be used; if it is not a valid Windows name, then the
+Netscape name will be used.
+
+RGB values can be retrieved with a case-insensitive hash key:
+
+  $rgb = $colors{'AliceBlue'};
+
+The value returned is in the six-digit hexidecimal format used in HTML and
+CSS (without the initial '#'). To convert it to separate red, green, and
+blue values (between 0 and 255), use the L</hex2tuple> function.
+
+=head2 Object-Oriented Interface
+
+If you prefer, an object-oriented interface is available:
+
+  $obj = Graphics::ColorNames->new( 'X' );
+
+  $hex = $obj->hex('skyblue'); # returns "87ceeb"
+
+  @rgb = $obj->rgb('skyblue'); # returns (0x87, 0xce, 0xeb)
+
+The interface is similar to the L<Color::Rgb> module:
+
+=over
+
+=item hex
+
+  $hex = $obj->hex($name, $prefix);
+
+Returns a 6-digit hexidecimal RGB code for the color.  If an optional
+prefix is specified, it will prefix the code with that string.  For
+example,
+
+  $hex = $obj->hex('blue', '#'); # returns "#0000ff"
+
+=item rgb
+
+  @rgb = $obj->rgb($name);
+
+  $rgb = $obj->rgb($name, $separator);
+
+If called in a list context, returns a triplet.
+
+If called in a scalar context, returns a string separated by an
+optional separator (which defauls to a comma).  For example,
+
+  @rgb = $obj->rgb('blue');      # returns (0, 0, 255)
+
+  $rgb = $obj->rgb('blue', ','); # returns "0,0,255"
+
+=back
+
+=head2 Utility Functions
+
+These functions are not exported by default, so much be specified to
+be used:
+
+  use Graphics::ColorNames qw( hex2tuple tuple2hex );
+
+=over
+
+=item hex2tuple
+
+  ($red, $green, $blue) = hex2tuple( $colors{'AliceBlue'});
+
+=item tuple2hex
+
+  $rgb = tuple2hex( $red, $green, $blue );
+
+=back
+
+=head2 Color Schemes
 
 Currently four schemes are available:
 
@@ -217,7 +314,8 @@ Currently four schemes are available:
 
 =item X
 
-About 650 color names used in X-Windows. I<This is the default naming scheme>, since it provides the most names.
+About 650 color names used in X-Windows. I<This is the default naming
+scheme>, since it provides the most names.
 
 =item HTML
 
@@ -238,35 +336,7 @@ names.
 
 =back
 
-Multiple schemes can be used:
-
-  tie %COLORS, 'Graphics::ColorNames', qw(HTML Windows Netscape);
-
-In this case, if the name is not a valid HTML color, the Windows
-name will be used; if it is not a valid Windows name, then the
-Netscape name will be used.
-
-RGB values can be retrieved with a case-insensitive hash key:
-
-  $rgb = $colors{'AliceBlue'};
-
-The value returned is in the six-digit hexidecimal format used in HTML and
-CSS (without the initial '#'). To convert it to separate red, green, and
-blue values (between 0 and 255), use the C<hex2tuple> function:
-
-  @rgb = hex2tuple( $colors{'AliceBlue'} );
-
-or
-
-  ($red, $green, $blue) = hex2tuple( $colors{'AliceBlue'});
-
-To convert separated red, green, and blue values into the corresponding RGB
-hexidecimal format, use the C<tuple2hex> function:
-
-  $rgb = tuple2hex( $red, $green, $blue );
-
-The C<hex2tuple> and C<tuple2hex> functions are not exported by default. You
-must specify them explicitly when you 'use' the module.
+Additional color schemes may be available on CPAN.
 
 =head2 Adding Naming Schemes
 
@@ -296,34 +366,46 @@ You would use the above schema as follows:
   tie %colors, 'Graphics::ColorNames', 'Metallic';
 
 An example of an additional module is Steve Pomeroy's
-Graphics::ColorNames::Mozilla module.
+L<Graphics::ColorNames::Mozilla> module.
+
+=head1 SEE ALSO
+
+L<Color::Rgb> has a similar function to this module, but parses an
+F<rgb.txt> file.
+
+L<Graphics::ColorObject> can convert between RGB and other color space
+types.
 
 =head1 AUTHOR
 
-Robert Rothenberg <rrwo@cpan.org>
+Robert Rothenberg <rrwo at cpan.org>
 
 =head2 Acknowledgements
 
-Alan D. Salewski <alans@cji.com> for feedback and the addition of
+Alan D. Salewski <alans at cji.com> for feedback and the addition of
 C<tuple2hex>.
 
-Steve Pomeroy <xavier@cpan.org> for pointing out invalid color
+Steve Pomeroy <xavier at cpan.org> for pointing out invalid color
 definitions in L<X.pm> v1.02.
 
-<chemboy@perlmonk.org> who pointed out a mispelling of "fuchsia" in
+<chemboy at perlmonk.org> who pointed out a mispelling of "fuchsia" in
 the HTML color space <https://rt.cpan.org/Ticket/Display.html?id=1704>.
 
-<magnus@mbox604.swipnet.se> who pointed out mispellings and naming
+<magnus at mbox604.swipnet.se> who pointed out mispellings and naming
 inconsistencies.
 
 =head2 Suggestions and Bug Reporting
 
 Feedback is always welcome.  Please use the CPAN Request Tracker at
-L<http://rt.cpan.org> to submit bugs reports.
+L<http://rt.cpan.org> to submit bug reports.
+
+If you create additional color schemes, please make them available
+separately in CPAN rather than submit them to me for inclusion into
+this module.
 
 =head1 LICENSE
 
-Copyright (c) 2001-2002 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2004 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
