@@ -10,7 +10,7 @@ use IO::File;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '0.39_02';
+our $VERSION   = '0.39_03';
 $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );

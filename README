@@ -49,6 +49,9 @@ DESCRIPTION
 HISTORY
     Revision history since v0.32:
 
+    0.39_03 22 Jul 2004
+	- added required rgb.txt for tests to MANIFEST and distro
+
     0.39_02 22 Jul 2004
 	* now requires Perl 5.6.0
 	- uses IO::File

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Graphics-ColorNames
-version: 0.39_02
+version: 0.39_03
 author: Robert Rothenberg <rrwo at cpan.org>
 abstract: defines RGB values for common color names
 license: perl

@@ -11,6 +11,7 @@ t/04-Windows.t
 t/05-Netscape.t
 t/06-obj.t
 t/07-file.t
+t/rgb.txt
 lib/Graphics/ColorNames.pm
 lib/Graphics/ColorNames/HTML.pm
 lib/Graphics/ColorNames/Netscape.pm
