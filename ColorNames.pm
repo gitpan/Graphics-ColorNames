@@ -11,7 +11,7 @@ use Carp;
 
 @ISA = qw( Exporter );
 
-$VERSION   = '0.22';
+$VERSION   = '0.23';
 
 @EXPORT    = qw( );
 @EXPORT_OK = qw( hex2tuple tuple2hex );
@@ -182,13 +182,19 @@ Currently three schemes are available:
 
 =item X
 
-550 color names used in X-Windows. I<This is the default naming scheme>, since
+752 color names used in X-Windows. I<This is the default naming scheme>, since
 it provides the most names.
 
 =item HTML
 
 16 common color names defined in the HTML 4.0 specification. These names
 are also used with CSS and SVG.
+
+=item Netscape
+
+100 color names names associated Netscape 1.1 (I cannot determine whether
+they were once usable in Netscape or were arbitrary names for RGB values--
+many of these names are not recognized by later versions of Netscape).
 
 =item Windows
 

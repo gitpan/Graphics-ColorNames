@@ -1,6 +1,11 @@
 Revision history for Perl extension Graphics::ColorNames.
 
-0.22
+0.23  17 Mar 2001
+	- X-Windows color names now from rgb.txt (includes names with
+	  spaces, such as 'alice blue' as well as 'aliceblue')
+	- Added Netscape color naming scheme
+
+0.22  15 Mar 2001
 	- added example on how to add your own naming schema
 	- schema files (X.pm, HTML.pm, Windows.pm) were stored in the
 	  wrong subdirectories

@@ -3,9 +3,11 @@ ColorNames.pm
 HTML.pm
 Makefile.PL
 MANIFEST
+Netscape.pm
 README
 t/ColorNames.t
 t/HTML.t
+t/Netscape.t
 t/Windows.t
 t/X.t
 Windows.pm

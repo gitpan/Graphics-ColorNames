@@ -16,24 +16,18 @@ REQUIREMENTS
       make install
 
 HISTORY
-    Revision history since v0.20:
+    Revision history since v0.22:
+
+    0.23  17 Mar 2001
+	- X-Windows color names now from rgb.txt (includes names with
+	  spaces, such as 'alice blue' as well as 'aliceblue')
+	- Added Netscape color naming scheme
 
     0.22  15 Mar 2001
 	- added example on how to add your own naming schema
 	- schema files (X.pm, HTML.pm, Windows.pm) were stored in the
 	  wrong subdirectories
 	- removed test.pl and double-testing
-
-    0.21  12 Mar 2001
-	- fixed an issue with Test::Harness expecting t/*.t tests
-
-    0.20  11 Mar 2001
-	- no longer a Tie::Hash
-	- additional example in POD
-	- added Test::Harness and a better test suite
-	- commented-out 'use warnings' in modules
-	- addition of tuple2hex function
-	- changed the way files are included in the distribution
 
 SYNOPSIS
       use Graphics::ColorNames qw( hex2tuple tuple2hex );
