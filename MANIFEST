@@ -1,13 +1,14 @@
 Changes
 ColorNames.pm
-HTML/HTML.pm
-HTML/Makefile.PL
+HTML.pm
 Makefile.PL
 MANIFEST
 README
+t/ColorNames.pl
+t/HTML.pl
+t/Windows.pl
+t/X.pl
 test.pl
-Windows/Makefile.PL
-Windows/Windows.pm
-X/Makefile.PL
-X/X.pm
+Windows.pm
+X.pm
 

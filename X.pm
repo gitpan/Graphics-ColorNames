@@ -28,11 +28,11 @@ Robert Rothenberg <rrwo@cpan.org>
 
 require 5.005;
 use strict;
-use warnings;
+# use warnings;
 
 use vars qw( $VERSION );
 
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 # Name and colors from Kevin J. Walsh, http://eies.njit.edu/~walsh/rgb.html
 

@@ -1,13 +1,41 @@
 NAME
     Graphics::ColorNames - defines RGB values for common color names
 
+REQUIREMENTS
+    `Graphics::ColorNames' should work on Perl 5.005.
+
+    It uses only standard modules.
+
+  Installation
+
+    Installation is pretty standard:
+
+      perl Makefile.PL
+      make
+      make test
+      make install
+
+HISTORY
+
+    0.20  11 Mar 2001
+	- no longer a Tie::Hash
+	- additional example in POD
+	- added Test::Harness and a better test suite
+	- commented-out 'use warnings' in modules
+	- addition of tuple2hex function
+	- changed the way files are included in the distribution
+
+    0.10  19 Feb 2001
+	- original (experimental) version released
+
 SYNOPSIS
-      use Graphics::ColorNames qw( hex2tuple );
+      use Graphics::ColorNames qw( hex2tuple tuple2hex );
 
       tie %NameTable, 'Graphics::ColorNames', 'X';
 
-      my $rgbhex = $NameTable{'green'};  # returns '00ff00'
-      my @rgbtup = hex2tuple( $rgbhex ); # returns (0, 255, 0)
+      my $rgbhex = $NameTable{'green'};    # returns '00ff00'
+      my $rgbhex = tuple2hex( 0, 255, 0 )  # returns '00ff00'
+      my @rgbtup = hex2tuple( $rgbhex );   # returns (0, 255, 0)
 
 DESCRIPTION
     This module defines RGB values for common color names. The intention is
@@ -16,39 +44,8 @@ DESCRIPTION
     the wheel" whenever they decide to give the users the option of
     specifying a color by name rather than RGB value.
 
-  Usage
-
-    The interface is through a tied hash:
-
-      tie %NAMETABLE, 'Graphics::ColorNames', SCHEME
-
-    where `%NAMETABLE' is the tied hash and `SCHEME' is the color scheme.
-    Currently three schemes are available:
-
-    X   550 color names used in X-Windows. *This is the default naming
-        scheme*, since it provides the most names.
-
-    HTML
-        16 common color names defined in the HTML 4.0 specification. These
-        names are also used with CSS and SVG.
-
-    Windows
-        16 commom color names used with Microsoft Windows and related
-        products. These are actually the same colors as `HTML', although
-        with different names.
-
-    RGB values can be retrieved with a case-insensitive hash key:
-
-      $rgb = $colors{'AliceBlue'};
-
-    The value returned is in the six-digit hexidecimal format used in HTML
-    and CSS (without the initial '#'). To convert it to separate red, green,
-    and blue values (between 0 and 255), use the `hex2tuple' function:
-
-      @rgb = hex2tuple( $colors{'AliceBlue'} );
-
-    The `hex2tuple' function is not exported by default. You must specify it
-    explicitly when you 'use' the module.
+    A more detailed description with documentation can be found in the
+    module's POD.
 
 CAVEAT
     This module is experimental. The interface may change.

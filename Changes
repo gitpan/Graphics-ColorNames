@@ -1,4 +1,13 @@
 Revision history for Perl extension Graphics::ColorNames.
 
-0.10  
+0.20  11 Mar 2001
+	- no longer a Tie::Hash
+	- additional example in POD
+	- added Test::Harness and a better test suite
+	- commented-out 'use warnings' in modules
+	- addition of tuple2hex function
+	- changed the way files are included in the distribution
+
+0.10  19 Feb 2001
+	- original (experimental) version released
 

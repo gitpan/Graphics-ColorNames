@@ -28,11 +28,11 @@ Robert Rothenberg <rrwo@cpan.org>
 
 require 5.005;
 use strict;
-use warnings;
+# use warnings;
 
 use vars qw( $VERSION );
 
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 sub NamesRgbTable() {
   use integer;
