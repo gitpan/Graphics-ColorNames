@@ -1,13 +1,15 @@
 --- #YAML:1.0
 name: Graphics-ColorNames
-version: 2.0_01
+version: 2.0_02
 author:
   - Robert Rothenberg <rrwo at cpan.org>
 abstract: defines RGB values for common color names
 license: perl
 requires:
+  AutoLoader: 0
   Carp: 0
   DirHandle: 0
+  Exporter: 0
   File::Spec: 0
   IO::File: 0
   Module::Load: 0.1
@@ -16,6 +18,7 @@ requires:
 recommends:
   Test::Pod: 1
   Test::Pod::Coverage: 0
+  Test::Portability::Files: 0
   Test::Prereq: 0
 build_requires:
   FileHandle: 0
@@ -23,13 +26,13 @@ build_requires:
 provides:
   Graphics::ColorNames:
     file: lib/Graphics/ColorNames.pm
-    version: 2.0_01
+    version: 2.0_02
   Graphics::ColorNames::HTML:
     file: lib/Graphics/ColorNames/HTML.pm
     version: 1.11
   Graphics::ColorNames::Netscape:
     file: lib/Graphics/ColorNames/Netscape.pm
-    version: 1.05
+    version: 1.06
   Graphics::ColorNames::Windows:
     file: lib/Graphics/ColorNames/Windows.pm
     version: 1.03

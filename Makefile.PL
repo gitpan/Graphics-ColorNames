@@ -5,8 +5,10 @@ WriteMakefile
           'NAME' => 'Graphics::ColorNames',
           'VERSION_FROM' => 'lib/Graphics/ColorNames.pm',
           'PREREQ_PM' => {
+                           'AutoLoader' => '0',
                            'Carp' => '0',
                            'DirHandle' => '0',
+                           'Exporter' => '0',
                            'File::Spec' => '0',
                            'FileHandle' => '0',
                            'IO::File' => '0',

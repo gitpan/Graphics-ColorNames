@@ -7,6 +7,7 @@ README
 t/00-Prereqs.t
 t/00-pod-coverage.t
 t/00-pod.t
+t/00-file-port.t
 t/01-ColorNames.t
 t/01-ColourNames.t
 t/02-X.t

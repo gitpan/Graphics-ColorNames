@@ -18,15 +18,22 @@ with Netscape 1.1 (I cannot determine whether they were once usable in
 Netscape or were arbitrary names for RGB values-- I<many of these names are
 not recognized by later versions of Netscape>).
 
+This scheme will be deprecated in future versions of L<Graphics::ColorNames>
+but available as a separate module from CPAN.
+
 =head2 Inconsistencies
 
 Note that the colors "gold", "lightblue" and "mediumblue" are the
 same. This is because the reference Netscape page (below) shows those
-RGB values. (As of December 2002, the page is still on-line.)
+RGB values. (As of April 2005, the page is still on-line.)
+
+Unfortunately the links to example images are broken, so they cannot
+be examined to determine the proper value.  Nor are these images
+available from the Internet Archive (L<http://www.archive.org>).
 
 =head1 SEE ALSO
 
-L<Graphics::ColorNames>, L<http://home1.netscape.com/home/bg/colorindex.html>
+L<Graphics::ColorNames>, L<http://home.netscape.com/home/bg/colorindex.html>
 
 =head1 AUTHOR
 
@@ -47,9 +54,8 @@ modify it under the same terms as Perl itself.
 require 5.006;
 
 use strict;
-use warnings;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 # See http://home1.netscape.com/home/bg/colorindex.html
 
@@ -94,7 +100,7 @@ sub NamesRgbTable() {
     "firebrick"           =>0x8e2323,
     "flesh"               =>0xf5ccb0,
     "forestgreen"         =>0x238e23,
-    "gold"                =>0xcd7f32,
+    "gold"                =>0xcd7f32, #
     "goldenrod"           =>0xdbdb70,
     "grey"                =>0x545454,
     "greencopper"         =>0x856363,
@@ -102,7 +108,7 @@ sub NamesRgbTable() {
     "huntergreen"         =>0x8e2323,
     "indianred"           =>0xf5ccb0,
     "khaki"               =>0x238e23,
-    "lightblue"           =>0xcd7f32,
+    "lightblue"           =>0xcd7f32, #
     "lightgrey"           =>0xdbdb70,
     "lightsteelblue"      =>0x545454,
     "lightwood"           =>0x856363,
@@ -110,7 +116,7 @@ sub NamesRgbTable() {
     "mandarianorange"     =>0x8e2323,
     "maroon"              =>0xf5ccb0,
     "mediumaquamarine"    =>0x238e23,
-    "mediumblue"          =>0xcd7f32,
+    "mediumblue"          =>0xcd7f32, #
     "mediumforestgreen"   =>0xdbdb70,
     "mediumgoldenrod"     =>0xeaeaae,
     "mediumorchid"        =>0x9370db,

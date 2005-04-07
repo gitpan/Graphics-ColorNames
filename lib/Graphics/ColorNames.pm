@@ -5,104 +5,32 @@ require 5.006;
 use strict;
 use warnings;
 
+use AutoLoader qw( AUTOLOAD );
+
 use Carp;
 use Module::Load;
 
+require Exporter;
+
 our @ISA = qw( Exporter );
 
-our $VERSION   = '2.0_01';
+our $VERSION   = '2.0_02';
 $VERSION = eval $VERSION;
 
-our @EXPORT    = qw( );
-our @EXPORT_OK = qw( hex2tuple tuple2hex all_schemes );
+our %EXPORT_TAGS = (
+ 'all'     => [ qw( hex2tuple tuple2hex all_schemes ) ],
+ 'utility' => [ qw( hex2tuple tuple2hex ) ],
+);
+our @EXPORT_OK    = ( @{ $EXPORT_TAGS{'all'} } );
+our @EXPORT       = ( );
 
-{
-  # We store Schemes in a hash as a quick-and-dirty way to filter
-  # duplicates (which sometimes occur when fidrectories are repeated
-  # in @INC or via symlinks).  The order does not matter.
 
-  my %Schemes = ( );
+# We store Schemes in a hash as a quick-and-dirty way to filter
+# duplicates (which sometimes occur when fidrectories are repeated
+# in @INC or via symlinks).  The order does not matter.
 
-  sub _find_schemes {
+my %Schemes = ( );
 
-    my $path = shift;
-
-    # BUG: deep-named schemes such as Graphics::ColorNames::Foo::Bar
-    # are not supported.
-
-    if (-d $path) {
-      my $dh = new DirHandle $path
-	|| croak "Unable to access directory $path";
-      while (defined(my $fn = $dh->read)) {
-	if ((-r File::Spec->catdir($path, $fn)) && ($fn =~ /(.+)\.pm$/)) {
-	  $Schemes{$1}++;
-	}
-      }
-    }
-  }
-
-  sub all_schemes {
-    unless (%Schemes) {
-
-      load DirHandle;  # These only need to be loaded once
-      load File::Spec;
-
-      foreach my $dir (@INC) {
-	_find_schemes(
-	  File::Spec->catdir($dir, split(/::/, __PACKAGE__)));
-      }
-    }
-    return (keys %Schemes);
-  }
-}
-
-sub _load_scheme_from_file {
-  my $self = shift;
-  my $file = shift;
-
-  unless (ref $file) {
-    unless (-r $file) {
-      croak "Cannot load scheme from file: \'$file\'";
-    }
-    load IO::File;
-  }
-
-  my $fh = ref($file) ? $file : (new IO::File);
-  unless (ref $file) {
-    open($fh, $file)
-      || croak "Cannot open file: \'$file\'";
-  }
-
-  while (my $line = <$fh>) {
-    unless ($line =~ /^[\!\#]/) {
-      chomp($line);
-      if ($line) {
-	my ($red, $green, $blue, $name, $rgb);
-
-	$name  = lc(substr($line, 12));
-	$name =~ s/^\s+//;	# remove leading and trailing spaces
-	$name =~ s/\s+$//;
-
-	# TODO? Should we add an option to warn if overlapping names
-	# are defined? This seems to be too common to be useful.
-
-	unless (defined $self->{NAMES}->{$name}) {
-
-	  $red   = eval substr($line,  0, 3);
-	  $green = eval substr($line,  4, 3);
-	  $blue  = eval substr($line,  8, 3);
-
-	  $rgb   = ($red << 16) | ($green << 8) | ($blue);
-
-	  $self->{NAMES}->{$name} = $rgb;
-	}
-      }
-    }
-  }
-  unless (ref $file) {
-    close $fh;
-  }
-}
 
 sub _load_scheme_from_module {
   my $self   = shift;
@@ -124,31 +52,6 @@ sub _load_scheme_from_module {
   }
 }
 
-sub load_scheme {
-  my $self   = shift;
-  my $scheme = shift;
-
-  if (ref($scheme) eq 'HASH') {
-    foreach my $name (keys %$scheme) {
-      $self->{NAMES}->{lc($name)} = $scheme->{$name},
-	unless (defined $self->{NAMES}->{lc($name)});
-    }
-  }
-  elsif (ref($scheme) eq 'CODE') {
-    push @{ $self->{SCHEMES} }, $scheme;
-  }
-  else {
-    eval {
-      if ((ref($scheme) eq 'GLOB') || $scheme->isa('IO::File')
-                                   || $scheme->isa('FileHandle')) {
-	$self->_load_scheme_from_file($scheme);
-      }
-    };
-    if ($!) {
-      croak "unsupported scheme type: ", ref($scheme);
-    }
-  }
-}
 
 sub TIEHASH {
   my $class = shift;
@@ -224,23 +127,6 @@ sub NEXTKEY {
   each %{$self->{NAMES}};
 }
 
-sub hex {
-    my $self = shift;
-    my $name = shift;
-    my $rgb  = $self->FETCH($name);
-    my $pre  = shift;
-    unless (defined $pre) { $pre = ""; }
-    return ($pre.$rgb);
-}
-
-sub rgb {
-    my $self = shift;
-    my $name = shift;
-    my @rgb  = hex2tuple($self->FETCH($name));
-    my $sep  = shift || ',';
-    return wantarray ? @rgb : join($sep,@rgb);
-}
-
 # Convert 6-digit hexidecimal code (used for HTML etc.) to an array of
 # RGB values
 
@@ -278,6 +164,131 @@ BEGIN {
 1;
 
 __END__
+
+sub _find_schemes {
+
+    my $path = shift;
+
+    # BUG: deep-named schemes such as Graphics::ColorNames::Foo::Bar
+    # are not supported.
+
+    if (-d $path) {
+      my $dh = new DirHandle $path
+	|| croak "Unable to access directory $path";
+      while (defined(my $fn = $dh->read)) {
+	if ((-r File::Spec->catdir($path, $fn)) && ($fn =~ /(.+)\.pm$/)) {
+	  $Schemes{$1}++;
+	}
+      }
+    }
+  }
+
+sub all_schemes {
+    unless (%Schemes) {
+
+      require DirHandle;  # These only need to be loaded once
+      require File::Spec;
+
+      foreach my $dir (@INC) {
+	_find_schemes(
+	  File::Spec->catdir($dir, split(/::/, __PACKAGE__)));
+      }
+    }
+    return (keys %Schemes);
+  }
+
+sub _load_scheme_from_file {
+  my $self = shift;
+  my $file = shift;
+
+  unless (ref $file) {
+    unless (-r $file) {
+      croak "Cannot load scheme from file: \'$file\'";
+    }
+    require IO::File;
+  }
+
+  my $fh = ref($file) ? $file : (new IO::File);
+  unless (ref $file) {
+    open($fh, $file)
+      || croak "Cannot open file: \'$file\'";
+  }
+
+  while (my $line = <$fh>) {
+    unless ($line =~ /^[\!\#]/) {
+      chomp($line);
+      if ($line) {
+	my ($red, $green, $blue, $name, $rgb);
+
+	$name  = lc(substr($line, 12));
+	$name =~ s/^\s+//;	# remove leading and trailing spaces
+	$name =~ s/\s+$//;
+
+	# TODO? Should we add an option to warn if overlapping names
+	# are defined? This seems to be too common to be useful.
+
+	unless (defined $self->{NAMES}->{$name}) {
+
+	  $red   = eval substr($line,  0, 3);
+	  $green = eval substr($line,  4, 3);
+	  $blue  = eval substr($line,  8, 3);
+
+	  $rgb   = ($red << 16) | ($green << 8) | ($blue);
+
+	  $self->{NAMES}->{$name} = $rgb;
+	}
+      }
+    }
+  }
+  unless (ref $file) {
+    close $fh;
+  }
+}
+
+sub load_scheme {
+  my $self   = shift;
+  my $scheme = shift;
+
+  if (ref($scheme) eq 'HASH') {
+    foreach my $name (keys %$scheme) {
+      $self->{NAMES}->{lc($name)} = $scheme->{$name},
+	unless (defined $self->{NAMES}->{lc($name)});
+    }
+  }
+  elsif (ref($scheme) eq 'CODE') {
+    push @{ $self->{SCHEMES} }, $scheme;
+  }
+  else {
+    eval {
+      if ((ref($scheme) eq 'GLOB') || $scheme->isa('IO::File')
+                                   || $scheme->isa('FileHandle')) {
+	$self->_load_scheme_from_file($scheme);
+      }
+    };
+    if ($!) {
+      croak "unsupported scheme type: ", ref($scheme);
+    }
+  }
+}
+
+sub hex {
+    my $self = shift;
+    my $name = shift;
+    my $rgb  = $self->FETCH($name);
+    my $pre  = shift;
+    unless (defined $pre) { $pre = ""; }
+    return ($pre.$rgb);
+}
+
+sub rgb {
+    my $self = shift;
+    my $name = shift;
+    my @rgb  = hex2tuple($self->FETCH($name));
+    my $sep  = shift || ',';
+    return wantarray ? @rgb : join($sep,@rgb);
+}
+
+# __END__
 
 =head1 NAME
 

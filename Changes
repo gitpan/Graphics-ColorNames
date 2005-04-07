@@ -1,5 +1,12 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+2.0_02  Thu Apr  7 2005
+	- lesser-used routines made into autoloaded methods
+	- added Test::Portabiity::Files test
+	- minor updates for Netscape theme
+	- added support for :utility export tag
+	- added support for :all export tag
+
 2.0_01  Mon Apr  4 2005
 	- removed DSLIP information from POD, since it has little meaning
 	- tweaked code
@@ -119,4 +126,5 @@ Revision history for Perl extension Graphics::ColorNames.
 
 0.10  19 Feb 2001
 	- original (experimental) version released
+
 
