@@ -9,7 +9,7 @@ require Graphics::ColorNames;
 
 use base 'Graphics::ColorNames';
 
-our $VERSION = '2.0_01';
+our $VERSION = '2.0_03';
 $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );

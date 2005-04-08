@@ -51,6 +51,12 @@ DESCRIPTION
 HISTORY
     Revision history since the last release:
 
+    2.0_03  Fri Apr  8 2005
+	- fixed bug with reading scheme from FileHandle type
+	- fixed glitch in pod-coverage test
+	- corrected version in Graphics::ColourNames
+	- added tests to check versions in sync
+
     2.0_02  Thu Apr  7 2005
 	- lesser-used routines made into autoloaded methods
 	- added Test::Portabiity::Files test

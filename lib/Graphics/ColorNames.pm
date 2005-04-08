@@ -14,7 +14,7 @@ require Exporter;
 
 our @ISA = qw( Exporter );
 
-our $VERSION   = '2.0_02';
+our $VERSION   = '2.0_03';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -259,14 +259,18 @@ sub load_scheme {
     push @{ $self->{SCHEMES} }, $scheme;
   }
   else {
+    undef $!;
     eval {
       if ((ref($scheme) eq 'GLOB') || $scheme->isa('IO::File')
                                    || $scheme->isa('FileHandle')) {
 	$self->_load_scheme_from_file($scheme);
       }
     };
-    if ($!) {
+    if ($@) {
       croak "unsupported scheme type: ", ref($scheme);
+    }
+    elsif ($!) {
+      croak $!;
     }
   }
 }

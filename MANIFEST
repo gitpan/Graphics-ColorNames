@@ -10,6 +10,7 @@ t/00-pod.t
 t/00-file-port.t
 t/01-ColorNames.t
 t/01-ColourNames.t
+t/01-version.t
 t/02-X.t
 t/03-HTML.t
 t/04-Windows.t
