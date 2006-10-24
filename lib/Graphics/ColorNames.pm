@@ -1,20 +1,16 @@
 package Graphics::ColorNames;
-
 require 5.006;
 
 use strict;
 use warnings;
 
-use AutoLoader qw( AUTOLOAD );
+use base 'Exporter';
 
+# use AutoLoader qw( AUTOLOAD );
 use Carp;
 use Module::Load;
 
-require Exporter;
-
-our @ISA = qw( Exporter );
-
-our $VERSION   = '2.0_03';
+our $VERSION   = '2.0_04';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -29,8 +25,10 @@ our @EXPORT       = ( );
 # duplicates (which sometimes occur when fidrectories are repeated
 # in @INC or via symlinks).  The order does not matter.
 
-my %Schemes = ( );
+my %FoundSchemes = ( );
 
+my %Names   = ( );
+my %Schemes = ( );
 
 sub _load_scheme_from_module {
   my $self   = shift;
@@ -54,12 +52,13 @@ sub _load_scheme_from_module {
 
 
 sub TIEHASH {
-  my $class = shift;
+  my $class = shift || __PACKAGE__;
 
-  my $self  = {
-    NAMES   => { },
-    SCHEMES => [ ], # a list of naming schemes, in priority search order
-  };
+  my $count = scalar(keys %Names);
+  my $self  = \$count;
+
+  $Names{($self)}   = { };
+  $Schemes{($self)} = [ ];
 
   bless $self, $class;
 
@@ -91,9 +90,9 @@ sub FETCH {
   if ($key =~ m/^\x23?([\da-f]{6})$/i) {
     return $1;
   } else {
-    my $value = $self->{NAMES}->{$key};
+    my $value = $Names{($self)}->{$key};
     unless (defined $value) {
-      my @schemes = @{ $self->{SCHEMES} };
+      my @schemes = @{ $Schemes{$self} || [] };
       while ((!defined $value) && (my $scheme = shift @schemes)) {
 	if ((ref $scheme) eq 'CODE') {
 	  $value = &$scheme($key);
@@ -119,12 +118,12 @@ sub EXISTS {
 
 sub FIRSTKEY {
   my $self = shift;
-  each %{$self->{NAMES}};
+  each %{$Names{($self)}};
 }
 
 sub NEXTKEY {
   my $self = shift;
-  each %{$self->{NAMES}};
+  each %{$Names{($self)}};
 }
 
 # Convert 6-digit hexidecimal code (used for HTML etc.) to an array of
@@ -163,7 +162,7 @@ BEGIN {
 
 1;
 
-__END__
+# __END__
 
 sub _find_schemes {
 
@@ -173,18 +172,18 @@ sub _find_schemes {
     # are not supported.
 
     if (-d $path) {
-      my $dh = new DirHandle $path
+      my $dh = DirHandle->new( $path )
 	|| croak "Unable to access directory $path";
       while (defined(my $fn = $dh->read)) {
 	if ((-r File::Spec->catdir($path, $fn)) && ($fn =~ /(.+)\.pm$/)) {
-	  $Schemes{$1}++;
+	  $FoundSchemes{$1}++;
 	}
       }
     }
   }
 
 sub all_schemes {
-    unless (%Schemes) {
+    unless (%FoundSchemes) {
 
       require DirHandle;  # These only need to be loaded once
       require File::Spec;
@@ -194,7 +193,7 @@ sub all_schemes {
 	  File::Spec->catdir($dir, split(/::/, __PACKAGE__)));
       }
     }
-    return (keys %Schemes);
+    return (keys %FoundSchemes);
   }
 
 sub _load_scheme_from_file {
@@ -227,7 +226,7 @@ sub _load_scheme_from_file {
 	# TODO? Should we add an option to warn if overlapping names
 	# are defined? This seems to be too common to be useful.
 
-	unless (defined $self->{NAMES}->{$name}) {
+	unless (defined $Names{($self)}->{$name}) {
 
 	  $red   = eval substr($line,  0, 3);
 	  $green = eval substr($line,  4, 3);
@@ -235,7 +234,7 @@ sub _load_scheme_from_file {
 
 	  $rgb   = ($red << 16) | ($green << 8) | ($blue);
 
-	  $self->{NAMES}->{$name} = $rgb;
+          $Names{($self)}->{$name} = $rgb;
 	}
       }
     }
@@ -251,12 +250,12 @@ sub load_scheme {
 
   if (ref($scheme) eq 'HASH') {
     foreach my $name (keys %$scheme) {
-      $self->{NAMES}->{lc($name)} = $scheme->{$name},
-	unless (defined $self->{NAMES}->{lc($name)});
+      $Names{($self)}->{lc($name)} = $scheme->{$name},
+	unless (defined $Names{($self)}->{lc($name)});
     }
   }
   elsif (ref($scheme) eq 'CODE') {
-    push @{ $self->{SCHEMES} }, $scheme;
+    push @{ $Schemes{($self)} }, $scheme;
   }
   else {
     undef $!;
@@ -588,13 +587,16 @@ inconsistencies.
 Feedback is always welcome.  Please use the CPAN Request Tracker at
 L<http://rt.cpan.org> to submit bug reports.
 
+There is now a SourceForge project for this package at
+L<http://sourceforge.net/projects/colornames/>
+
 If you create additional color schemes, please make them available
 separately in CPAN rather than submit them to me for inclusion into
 this module.
 
 =head1 LICENSE
 
-Copyright (c) 2001-2005 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2006 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

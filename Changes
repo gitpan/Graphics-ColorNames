@@ -1,5 +1,11 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+2.0_04  Tue Oct 24 2006
+	- fixed Pod::Coverage tests (RT#20923)
+	- various optimizations
+	- changed to use inside-out object scheme
+	- no longer signing code (too many problems w/Module::Signature)
+
 2.0_03  Fri Apr  8 2005
 	- fixed bug with reading scheme from FileHandle type
 	- fixed glitch in pod-coverage test

@@ -26,4 +26,3 @@ lib/Graphics/ColorNames/Windows.pm
 lib/Graphics/ColorNames/X.pm
 lib/Graphics/ColourNames.pm
 
-SIGNATURE    Added here by Module::Build

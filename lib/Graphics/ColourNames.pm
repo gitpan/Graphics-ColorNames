@@ -5,27 +5,23 @@ require 5.006;
 use strict;
 use warnings;
 
-require Graphics::ColorNames;
-
 use base 'Graphics::ColorNames';
 
-our $VERSION = '2.0_03';
+our $VERSION = '2.0_04';
 $VERSION = eval $VERSION;
 
 our @EXPORT    = qw( );
 our @EXPORT_OK = qw( hex2tuple tuple2hex all_schemes );
 
-sub all_schemes {
-  goto &Graphics::ColorNames::all_schemes;
+BEGIN {
+  foreach my $func (qw(hex2tuple tuple2hex all_schemes)) {
+    no strict 'refs';
+    *$func = sub {
+     goto "Graphics::ColorNames::$func";
+    };
+  }
 }
 
-sub hex2tuple {
-  goto &Graphics::ColorNames::hex2tuple;
-}
-
-sub tuple2hex {
-  goto &Graphics::ColorNames::tuple2hex;
-}
 
 1;
 
@@ -62,7 +58,7 @@ Robert Rothenberg <rrwo at cpan.org>
 
 =head1 LICENSE
 
-Copyright (c) 2004-2005 Robert Rothenberg. All rights reserved.
+Copyright (c) 2004-2006 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

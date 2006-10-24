@@ -3,10 +3,12 @@
 use strict;
 use Test::More;
 
-eval "use Test::Pod::Coverage";
+if (eval "use Test::Pod::Coverage tests => 1") {
+}
+else {
+  plan skip_all => "Test::Pod::Coverage required" if $@;
+}
 
-plan skip_all => "Test::Pod::Coverage required" if $@;
-
-plan tests => 1;
 pod_coverage_ok("Graphics::ColorNames");
+
 
