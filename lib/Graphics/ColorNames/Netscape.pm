@@ -25,7 +25,7 @@ but available as a separate module from CPAN.
 
 Note that the colors "gold", "lightblue" and "mediumblue" are the
 same. This is because the reference Netscape page (below) shows those
-RGB values. (As of April 2005, the page is still on-line.)
+RGB values. (As of March 2007, a version of the page is still on-line.)
 
 Unfortunately the links to example images are broken, so they cannot
 be examined to determine the proper value.  Nor are these images
@@ -33,7 +33,15 @@ available from the Internet Archive (L<http://www.archive.org>).
 
 =head1 SEE ALSO
 
-L<Graphics::ColorNames>, L<http://home.netscape.com/home/bg/colorindex.html>
+L<Graphics::ColorNames>
+
+L<Graphics::ColorNames::Mozilla>
+
+L<Graphics::ColorNames::IE>
+
+L<Graphics::ColorNames::SVG>
+
+The color names come from L<http://wp.netscape.com/home/bg/colorindex.html>.
 
 =head1 AUTHOR
 
@@ -41,11 +49,14 @@ Robert Rothenberg <rrwo at cpan.org>
 
 =head2 Acknowledgements
 
-<magnus at mbox604.swipnet.se> who pointed out Inconsistencies
+"Magnus", who pointed out inconsistencies.
+
+Gary Vollink, who suggested color schemes for later Netscape versions,
+and pointed out that the original Netscape page had moved.
 
 =head1 LICENSE
 
-Copyright (c) 2001-2004 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2007 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
@@ -55,7 +66,7 @@ require 5.006;
 
 use strict;
 
-our $VERSION = '1.06';
+our $VERSION = '2.01';
 
 # See http://home1.netscape.com/home/bg/colorindex.html
 

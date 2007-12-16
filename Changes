@@ -1,5 +1,10 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+2.01    Sun Dec 16 2007
+	- Changed versions of specific color schemes to match main module
+	- Removed Graphics::ColourNames from the distribution
+	- updated documentation for Netscape.pm
+
 2.0_04  Tue Oct 24 2006
 	- fixed Pod::Coverage tests (RT#20923)
 	- various optimizations

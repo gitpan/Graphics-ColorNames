@@ -33,7 +33,7 @@ Robert Rothenberg <rrwo at cpan.org>
 
 =head1 LICENSE
 
-Copyright (c) 2001-2004 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2007 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
@@ -44,7 +44,7 @@ require 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.11';
+our $VERSION = '2.01';
 
 sub NamesRgbTable() {
   use integer;

@@ -10,7 +10,7 @@ use base 'Exporter';
 use Carp;
 use Module::Load;
 
-our $VERSION   = '2.0_04';
+our $VERSION   = '2.01';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -596,7 +596,7 @@ this module.
 
 =head1 LICENSE
 
-Copyright (c) 2001-2006 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2007 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

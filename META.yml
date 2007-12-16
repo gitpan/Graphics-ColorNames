@@ -1,6 +1,6 @@
 ---
 name: Graphics-ColorNames
-version: 2.0_04
+version: 2.01
 author:
   - 'Robert Rothenberg <rrwo at cpan.org>'
 abstract: defines RGB values for common color names
@@ -28,23 +28,20 @@ recommends:
 provides:
   Graphics::ColorNames:
     file: lib/Graphics/ColorNames.pm
-    version: 2.0_04
+    version: 2.01
   Graphics::ColorNames::HTML:
     file: lib/Graphics/ColorNames/HTML.pm
-    version: 1.11
+    version: 2.01
   Graphics::ColorNames::Netscape:
     file: lib/Graphics/ColorNames/Netscape.pm
-    version: 1.06
+    version: 2.01
   Graphics::ColorNames::Windows:
     file: lib/Graphics/ColorNames/Windows.pm
-    version: 1.03
+    version: 2.01
   Graphics::ColorNames::X:
     file: lib/Graphics/ColorNames/X.pm
-    version: 1.06
-  Graphics::ColourNames:
-    file: lib/Graphics/ColourNames.pm
-    version: 2.0_04
-generated_by: Module::Build version 0.2805
+    version: 2.01
+generated_by: Module::Build version 0.2808
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
