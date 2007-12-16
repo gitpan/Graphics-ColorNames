@@ -1,5 +1,11 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+2.02    Sun Dec 16 2007
+	- renamed developer-related test scripts
+	- removed 90-prereqs.t (it wasn't working properly sometimes)
+	- added DEVEL_TESTS environment variable as requirement for
+	  developer tests
+
 2.01    Sun Dec 16 2007
 	- Changed versions of specific color schemes to match main module
 	- Removed Graphics::ColourNames from the distribution

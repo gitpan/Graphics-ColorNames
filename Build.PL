@@ -19,7 +19,6 @@ my $build = Module::Build->new
        'Test::Pod::Coverage'        => 0,
        'Test::Pod'                  => 1.00,
        'Test::Portability::Files'   => 0,
-       'Test::Prereq'               => 0,
      },
      build_requires => {
        'FileHandle'                 => 0,    # for testing
@@ -28,6 +27,7 @@ my $build = Module::Build->new
      autosplit => [
        'lib/Graphics/ColorNames.pm',
      ],
+     create_readme      => ($Module::Build::VERSION >= 0.2702),
      create_makefile_pl => 'traditional',
      dist_author        => 'Robert Rothenberg <rrwo at cpan.org>',
      sign               => 0,

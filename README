@@ -2,93 +2,69 @@ NAME
     Graphics::ColorNames - defines RGB values for common color names
 
 REQUIREMENTS
-    `Graphics::ColorNames' should work on Perl 5.6.0.
-
-    It requires the following non-standard modules:
+    `Graphics::ColorNames' should work on Perl 5.6.0. It requires the
+    following non-standard modules:
 
       Module::Load
 
-  Installation
+INSTALLATION
+    Installation can be done using the traditional Makefile.PL or the newer
+    Build.PL methods.
 
-    Installation is pretty standard:
+    Using Makefile.PL:
 
       perl Makefile.PL
-      make
       make test
       make install
 
-    (On Windows platforms you should use nmake instead.)
+    (On Windows platforms you should use `nmake' instead.)
 
     Using Build.PL (if you have Module::Build installed):
 
       perl Build.PL
-      perl Build
       perl Build test
-      perl Build install    
+      perl Build install
 
 SYNOPSIS
       use Graphics::ColorNames qw( hex2tuple tuple2hex );
 
-      tie %NameTable, 'Graphics::ColorNames', 'X';
+      tie %ColorTable, 'Graphics::ColorNames', 'X';
 
-      my $rgbhex1 = $NameTable{'green'};    # returns '00ff00'
-      my $rgbhex2 = tuple2hex( 0, 255, 0 ); # returns '00ff00'
-      my @rgbtup  = hex2tuple( $rgbhex );   # returns (0, 255, 0)
+      $rgbhex1 = $ColorTable{'green'};    # returns '00ff00'
+      $rgbhex2 = tuple2hex( 0, 255, 0 );  # returns '00ff00'
+      @rgbtup  = hex2tuple( $rgbhex );    # returns (0, 255, 0)
 
-      my $rgbhex3 = $NameTable{'#123abc'};  # returns '123abc'
-      my $rgbhex4 = $NameTable{'123abc'};   # returns '123abc'
+      $rgbhex3 = $ColorTable{'#123abc'};  # returns '123abc'
+      $rgbhex4 = $ColorTable{'123abc'};   # returns '123abc'
 
 DESCRIPTION
     This module defines RGB values for common color names. The intention is
     to (1) provide a common module that authors can use with other modules
-    to specify colors; and (2) free module authors from having to "re-invent
-    the wheel" whenever they decide to give the users the option of
-    specifying a color by name rather than RGB value.
+    to specify colors by name; and (2) free module authors from having to
+    "re-invent the wheel" whenever they decide to give the users the option
+    of specifying a color by name rather than RGB value.
 
-    A more detailed description with documentation can be found in the
-    module's POD.
+    See the module POD for complete documentation.
 
-HISTORY
-    Revision history since the last release:
+REVISION HISTORY
+    Changes since the last release
 
-    2.0_03  Fri Apr  8 2005
-	- fixed bug with reading scheme from FileHandle type
-	- fixed glitch in pod-coverage test
-	- corrected version in Graphics::ColourNames
-	- added tests to check versions in sync
-
-    2.0_02  Thu Apr  7 2005
-	- lesser-used routines made into autoloaded methods
-	- added Test::Portabiity::Files test
-	- minor updates for Netscape theme
-	- added support for :utility export tag
-	- added support for :all export tag
-
-    2.0_01  Mon Apr  4 2005
-	- removed DSLIP information from POD, since it has little meaning
-	- tweaked code
-	- color scheme can be a module name
-	- fixed bug in Pod::Coverage test, uses Test::Pod::Coverage
-	* major change in how schemes are stored, which affects priority
-	  when CODE scheme types are used
-	- can load rgb.txt from GLOB, FileHandle or IO::File
-	- references can be specified as possible schemes in constructor
-	- added public load_scheme method
-	- various optimizations and tweaks
-	- IO::File is loaded only as needed
-	- rgb.txt file must be radable to be loaded
-	- tweaked tests
-	- RGB passthrough now consistently returns lowercase values
-	- minor optimization in FETCH for RGB passthrough
-	- added all_schemes function to query schemes
-
-    A more detailed revision history is available in the Changes file.
+    2.02    Sun Dec 16 2007
+            - renamed developer-related test scripts
+            - removed 90-prereqs.t (it wasn't working properly sometimes)
+            - added DEVEL_TESTS environment variable as requirement for
+              developer tests
+    
+    2.01    Sun Dec 16 2007
+            - Changed versions of specific color schemes to match main module
+            - Removed Graphics::ColourNames from the distribution
+            - updated documentation for Netscape.pm
 
 AUTHOR
     Robert Rothenberg <rrwo at cpan.org>
 
 LICENSE
-    Copyright (c) 2001-2005 Robert Rothenberg. All rights
-    reserved. This program is free software; you can redistribute it
-    and/or modify it under the same terms as Perl itself.
+    Copyright (c) 2001-2007 Robert Rothenberg. All rights reserved. This
+    program is free software; you can redistribute it and/or modify it under
+    the same terms as Perl itself.
 

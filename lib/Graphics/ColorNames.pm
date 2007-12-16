@@ -10,7 +10,7 @@ use base 'Exporter';
 use Carp;
 use Module::Load;
 
-our $VERSION   = '2.01';
+our $VERSION   = '2.02';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -297,12 +297,35 @@ sub rgb {
 
 Graphics::ColorNames - defines RGB values for common color names
 
+=begin readme
+
 =head1 REQUIREMENTS
 
 C<Graphics::ColorNames> should work on Perl 5.6.0.  It requires the
 following non-standard modules:
 
   Module::Load
+
+=head1 INSTALLATION
+
+Installation can be done using the traditional Makefile.PL or the newer
+Build.PL methods.
+
+Using Makefile.PL:
+
+  perl Makefile.PL
+  make test
+  make install
+
+(On Windows platforms you should use C<nmake> instead.)
+
+Using Build.PL (if you have L<Module::Build> installed):
+
+  perl Build.PL
+  perl Build test
+  perl Build install
+
+=end readme
 
 =head1 SYNOPSIS
 
@@ -324,6 +347,14 @@ is to (1) provide a common module that authors can use with other
 modules to specify colors by name; and (2) free module authors from
 having to "re-invent the wheel" whenever they decide to give the users
 the option of specifying a color by name rather than RGB value.
+
+=begin readme
+
+See the module POD for complete documentation.
+
+=end readme
+
+=for readme stop
 
 For example,
 
@@ -556,6 +587,7 @@ specified:
 
   tie %NameTable, 'Graphics::ColourNames', 'Graphics::ColourNames::Scheme';
 
+
 =head1 SEE ALSO
 
 L<Color::Rgb> has a similar function to this module, but parses an
@@ -564,9 +596,23 @@ F<rgb.txt> file.
 L<Graphics::ColorObject> can convert between RGB and other color space
 types.
 
+=begin readme
+
+=head1 REVISION HISTORY
+
+Changes since the last release
+
+=for readme include file=Changes start=^2.02 stop=^2.0_04 type=text
+
+=end readme
+
+=for readme continue
+
 =head1 AUTHOR
 
 Robert Rothenberg <rrwo at cpan.org>
+
+=for readme stop
 
 =head2 Acknowledgements
 
@@ -593,6 +639,8 @@ L<http://sourceforge.net/projects/colornames/>
 If you create additional color schemes, please make them available
 separately in CPAN rather than submit them to me for inclusion into
 this module.
+
+=for readme continue
 
 =head1 LICENSE
 
