@@ -6,11 +6,10 @@ use warnings;
 
 use base 'Exporter';
 
-# use AutoLoader qw( AUTOLOAD );
 use Carp;
 use Module::Load;
 
-our $VERSION   = '2.02';
+our $VERSION   = '2.03';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -20,7 +19,6 @@ our %EXPORT_TAGS = (
 our @EXPORT_OK    = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT       = ( );
 
-
 # We store Schemes in a hash as a quick-and-dirty way to filter
 # duplicates (which sometimes occur when fidrectories are repeated
 # in @INC or via symlinks).  The order does not matter.
@@ -29,6 +27,9 @@ my %FoundSchemes = ( );
 
 my %Names   = ( );
 my %Schemes = ( );
+
+
+# TODO - see if using Tie::Hash::Layered gives an improvement
 
 sub _load_scheme_from_module {
   my $self   = shift;
@@ -602,7 +603,7 @@ types.
 
 Changes since the last release
 
-=for readme include file=Changes start=^2.02 stop=^2.0_04 type=text
+=for readme include file=Changes start=^2.03 stop=^2.0_04 type=text
 
 =end readme
 

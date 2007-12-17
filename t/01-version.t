@@ -1,14 +1,13 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 4;
+use Test::More tests => 5;
 
-require Graphics::ColorNames;
+use_ok("Graphics::ColorNames");
 
 my @Modules = (qw( X HTML Windows Netscape));
-
-require Graphics::ColourNames;
 
 foreach my $mod (@Modules) {
     use_ok("Graphics::ColorNames::$mod", $Graphics::ColorNames::VERSION);
 }
+

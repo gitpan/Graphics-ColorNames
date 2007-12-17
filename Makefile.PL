@@ -16,8 +16,7 @@ WriteMakefile
                            'Carp' => 0,
                            'Test::More' => 0,
                            'Module::Load' => '0.1',
-                           'DirHandle' => 0,
-                           'AutoLoader' => 0
+                           'DirHandle' => 0
                          }
         )
 ;

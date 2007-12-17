@@ -66,7 +66,7 @@ require 5.006;
 
 use strict;
 
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 # See http://home1.netscape.com/home/bg/colorindex.html
 
