@@ -41,7 +41,7 @@ require 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 # Original name and colors (v1.01 and earlier) from Kevin J. Walsh,
 # http://eies.njit.edu/~walsh/rgb.html

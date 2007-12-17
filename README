@@ -49,22 +49,10 @@ DESCRIPTION
 REVISION HISTORY
     Changes since the last release
 
-    2.03    Mon Dec 17 2007
-            - fixed glitch with version test
-            - cleaned up format of text files
-            - removed unneeded dependency
-            - README generated from POD using Pod::Readme (v2.02)
-    
-    2.02    Sun Dec 16 2007
-            - renamed developer-related test scripts
-            - removed 90-prereqs.t (it wasn't working properly sometimes)
-            - added DEVEL_TESTS environment variable as requirement for
-              developer tests
-    
-    2.01    Sun Dec 16 2007
-            - Changed versions of specific color schemes to match main module
-            - Removed Graphics::ColourNames from the distribution
-            - updated documentation for Netscape.pm
+    2.04    Mon Dec 17 2007
+            - fixed inconsistencies in Netscape color scheme
+
+    More details can be found in the Changes file.
 
 AUTHOR
     Robert Rothenberg <rrwo at cpan.org>

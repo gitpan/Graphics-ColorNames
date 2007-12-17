@@ -1,5 +1,8 @@
 Revision history for Perl extension Graphics::ColorNames.
 
+2.04    Mon Dec 17 2007
+	- fixed inconsistencies in Netscape color scheme
+
 2.03    Mon Dec 17 2007
 	- fixed glitch with version test
 	- cleaned up format of text files

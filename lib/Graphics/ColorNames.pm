@@ -9,7 +9,7 @@ use base 'Exporter';
 use Carp;
 use Module::Load;
 
-our $VERSION   = '2.03';
+our $VERSION   = '2.04';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -603,7 +603,9 @@ types.
 
 Changes since the last release
 
-=for readme include file=Changes start=^2.03 stop=^2.0_04 type=text
+=for readme include file=Changes start=^2.04 stop=^2.03 type=text
+
+More details can be found in the F<Changes> file.
 
 =end readme
 

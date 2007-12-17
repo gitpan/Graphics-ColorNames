@@ -21,16 +21,6 @@ not recognized by later versions of Netscape>).
 This scheme will be deprecated in future versions of L<Graphics::ColorNames>
 but available as a separate module from CPAN.
 
-=head2 Inconsistencies
-
-Note that the colors "gold", "lightblue" and "mediumblue" are the
-same. This is because the reference Netscape page (below) shows those
-RGB values. (As of March 2007, a version of the page is still on-line.)
-
-Unfortunately the links to example images are broken, so they cannot
-be examined to determine the proper value.  Nor are these images
-available from the Internet Archive (L<http://www.archive.org>).
-
 =head1 SEE ALSO
 
 L<Graphics::ColorNames>
@@ -42,6 +32,8 @@ L<Graphics::ColorNames::IE>
 L<Graphics::ColorNames::SVG>
 
 The color names come from L<http://wp.netscape.com/home/bg/colorindex.html>.
+Corrections to errors in the Netscape spec are due to 
+L<http://www.he.net/info/color/>.
 
 =head1 AUTHOR
 
@@ -66,7 +58,7 @@ require 5.006;
 
 use strict;
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 # See http://home1.netscape.com/home/bg/colorindex.html
 
@@ -119,7 +111,7 @@ sub NamesRgbTable() {
     "huntergreen"         =>0x8e2323,
     "indianred"           =>0xf5ccb0,
     "khaki"               =>0x238e23,
-    "lightblue"           =>0xcd7f32, #
+    "lightblue"           =>0xcdd9d9, # 
     "lightgrey"           =>0xdbdb70,
     "lightsteelblue"      =>0x545454,
     "lightwood"           =>0x856363,
@@ -127,7 +119,7 @@ sub NamesRgbTable() {
     "mandarianorange"     =>0x8e2323,
     "maroon"              =>0xf5ccb0,
     "mediumaquamarine"    =>0x238e23,
-    "mediumblue"          =>0xcd7f32, #
+    "mediumblue"          =>0x3232cd, #
     "mediumforestgreen"   =>0xdbdb70,
     "mediumgoldenrod"     =>0xeaeaae,
     "mediumorchid"        =>0x9370db,
