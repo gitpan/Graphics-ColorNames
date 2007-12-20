@@ -33,12 +33,11 @@ modify it under the same terms as Perl itself.
 
 =cut
 
-require 5.006;
-
 use strict;
 use warnings;
 
-our $VERSION = '2.04';
+our $VERSION = '2.10_01';
+$VERSION = eval $VERSION;
 
 sub NamesRgbTable() {
   use integer;

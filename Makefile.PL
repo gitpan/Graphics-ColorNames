@@ -10,12 +10,13 @@ WriteMakefile
           'PREREQ_PM' => {
                            'base' => 0,
                            'IO::File' => 0,
+                           'Tie::Sub' => 0,
                            'File::Spec' => 0,
                            'FileHandle' => 0,
                            'Exporter' => 0,
                            'Carp' => 0,
                            'Test::More' => 0,
-                           'Module::Load' => '0.1',
+                           'Module::Load' => '0.10',
                            'DirHandle' => 0
                          }
         )

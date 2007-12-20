@@ -5,14 +5,15 @@ my $build = Module::Build->new
      module_name => 'Graphics::ColorNames',
      license => 'perl',
      requires => {
-       'perl'                       => '5.6.0',
+       'perl'                       => '5.006',
        'base'                       => 0,
        'Carp'                       => 0,
        'DirHandle'                  => 0,
        'Exporter'                   => 0,
        'File::Spec'                 => 0,
        'IO::File'                   => 0,
-       'Module::Load'               => 0.10,
+       'Module::Load'               => '0.10',
+       'Tie::Sub'                   => 0,
      },
      recommends => {
        'Pod::Readme'                => 0.09,

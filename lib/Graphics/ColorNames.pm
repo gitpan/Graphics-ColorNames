@@ -1,5 +1,5 @@
 package Graphics::ColorNames;
-require 5.006;
+use 5.006;
 
 use strict;
 use warnings;
@@ -8,8 +8,9 @@ use base 'Exporter';
 
 use Carp;
 use Module::Load;
+use Tie::Sub;
 
-our $VERSION   = '2.04';
+our $VERSION   = '2.10_01';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -20,14 +21,13 @@ our @EXPORT_OK    = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT       = ( );
 
 # We store Schemes in a hash as a quick-and-dirty way to filter
-# duplicates (which sometimes occur when fidrectories are repeated
-# in @INC or via symlinks).  The order does not matter.
+# duplicates (which sometimes occur when directories are repeated in
+# @INC or via symlinks).  The order does not matter.
 
 my %FoundSchemes = ( );
 
-my %Names   = ( );
-my %Schemes = ( );
-
+my %Schemes     = ( );
+my %Iterators   = ( ); # used by FIRST_KEY, NEXT_KEY
 
 # TODO - see if using Tie::Hash::Layered gives an improvement
 
@@ -51,14 +51,13 @@ sub _load_scheme_from_module {
   }
 }
 
-
 sub TIEHASH {
   my $class = shift || __PACKAGE__;
 
-  my $count = scalar(keys %Names);
+  my $count = scalar(keys %Schemes); ## Names
   my $self  = \$count;
 
-  $Names{($self)}   = { };
+  ## $Names{($self)}   = { };
   $Schemes{($self)} = [ ];
 
   bless $self, $class;
@@ -88,27 +87,22 @@ sub FETCH {
 
   # If we're passing it an RGB value, return that value
 
-  if ($key =~ m/^\x23?([\da-f]{6})$/i) {
+  if ($key =~ m/^\x23?([\da-f]{6})$/) {
     return $1;
   } else {
-    my $value = $Names{($self)}->{$key};
-    unless (defined $value) {
-      my @schemes = @{ $Schemes{$self} || [] };
-      while ((!defined $value) && (my $scheme = shift @schemes)) {
-	if ((ref $scheme) eq 'CODE') {
-	  $value = &$scheme($key);
-	}
-	elsif ((ref $scheme) eq 'HASH') {
-	  $value = $scheme->{$key};
-	}
-	else {
-	  # This shouldn't be called
-	  croak "unsupported scheme type: ", ref($scheme);
-	}
+      $key =~ s/\W//g; # ignore non-word characters
+
+      my $val = undef;
+      my $i   = 0;
+      while ((!defined $val) && ($i < @{$Schemes{($self)}})) {
+	  $val = $Schemes{($self)}->[$i++]->{$key};
       }
-    }
-    $value = sprintf('%06x', $value ), if (defined $value);
-    return $value;
+
+      if (defined $val) {
+ 	  return sprintf('%06x', $val ), ;
+      } else {
+ 	  return;
+      }
   }
 }
 
@@ -119,12 +113,18 @@ sub EXISTS {
 
 sub FIRSTKEY {
   my $self = shift;
-  each %{$Names{($self)}};
+  $Iterators{($self)} = 0;
+  each %{$Schemes{$self}->[$Iterators{($self)}]};
 }
 
 sub NEXTKEY {
   my $self = shift;
-  each %{$Names{($self)}};
+  my ($key, $val)  = each %{$Schemes{$self}->[$Iterators{($self)}]};
+  unless (defined $key) {
+      $Iterators{($self)}++;
+      ($key, $val)  = each %{$Schemes{$self}->[$Iterators{($self)}]};
+  }
+  return $key;
 }
 
 # Convert 6-digit hexidecimal code (used for HTML etc.) to an array of
@@ -163,6 +163,8 @@ BEGIN {
 
 1;
 
+
+# Because we use global variables, we cannot have an AutoLoader.
 # __END__
 
 sub _find_schemes {
@@ -214,32 +216,34 @@ sub _load_scheme_from_file {
       || croak "Cannot open file: \'$file\'";
   }
 
-  while (my $line = <$fh>) {
-    unless ($line =~ /^[\!\#]/) {
-      chomp($line);
-      if ($line) {
-	my ($red, $green, $blue, $name, $rgb);
+  my $scheme = { };
 
-	$name  = lc(substr($line, 12));
-	$name =~ s/^\s+//;	# remove leading and trailing spaces
-	$name =~ s/\s+$//;
+  while (my $line = <$fh>) {
+      chomp($line);
+      $line =~ s/[\!\#].*$//;
+      if ($line ne "") {
+	my $name  = lc(substr($line, 12));
+	$name     =~ s/[\W]//g; # remove anything that isn't a letter or number
+
+	croak "missing color name",
+	  unless ($name ne "");
 
 	# TODO? Should we add an option to warn if overlapping names
 	# are defined? This seems to be too common to be useful.
 
-	unless (defined $Names{($self)}->{$name}) {
+	# unless (exists $scheme->{$name}) {
 
-	  $red   = eval substr($line,  0, 3);
-	  $green = eval substr($line,  4, 3);
-	  $blue  = eval substr($line,  8, 3);
+ 	  $scheme->{$name} = 0;
+	  foreach (0, 4, 8) {
+	      $scheme->{$name} <<= 8;
+	      $scheme->{$name}  |= (eval substr($line,  $_, 3));
+	  }
 
-	  $rgb   = ($red << 16) | ($green << 8) | ($blue);
-
-          $Names{($self)}->{$name} = $rgb;
-	}
+	# }
       }
-    }
   }
+  $self->load_scheme( $scheme );
+
   unless (ref $file) {
     close $fh;
   }
@@ -249,28 +253,30 @@ sub load_scheme {
   my $self   = shift;
   my $scheme = shift;
 
-  if (ref($scheme) eq 'HASH') {
-    foreach my $name (keys %$scheme) {
-      $Names{($self)}->{lc($name)} = $scheme->{$name},
-	unless (defined $Names{($self)}->{lc($name)});
-    }
+  if (ref($scheme) eq "HASH") {
+      push @{ $Schemes{($self)} }, $scheme;
   }
-  elsif (ref($scheme) eq 'CODE') {
-    push @{ $Schemes{($self)} }, $scheme;
+  elsif (ref($scheme) eq "CODE") {
+      push @{$Schemes{($self)}}, { };
+      tie %{$Schemes{($self)}->[-1]}, 'Tie::Sub', $scheme;
   }
   else {
     undef $!;
     eval {
-      if ((ref($scheme) eq 'GLOB') || $scheme->isa('IO::File')
-                                   || $scheme->isa('FileHandle')) {
+      if ((ref($scheme) eq 'GLOB')
+         || ref($scheme) eq "IO::File"   || $scheme->isa('IO::File')
+         || ref($scheme) eq "FileHandle" || $scheme->isa('FileHandle')) {
 	$self->_load_scheme_from_file($scheme);
       }
     };
     if ($@) {
-      croak "unsupported scheme type: ", ref($scheme);
+      croak "error $@ on scheme type ", ref($scheme);
     }
     elsif ($!) {
-      croak $!;
+      croak "$!";
+    }
+    else {
+	# everything is ok?
     }
   }
 }
@@ -292,7 +298,7 @@ sub rgb {
     return wantarray ? @rgb : join($sep,@rgb);
 }
 
-# __END__
+__END__
 
 =head1 NAME
 
@@ -374,8 +380,8 @@ to understand than C<0x7A, 0xC5, 0xCD>). The variable is named for its
 function, not form (ie, C<$CadetBlue3>) so that if the author later changes
 the background color, the variable name need not be changed.
 
-As an added feature, a hexidecimal RGB value in the form of #RRGGBB or
-RRGGBB will return itself:
+As an added feature, a hexidecimal RGB value in the form of #RRGGBB,
+0xRRGGBB or RRGGBB will return itself:
 
   my $rgbhex3 = $ColorTable{'#123abc'};  # returns '123abc'
 
@@ -411,8 +417,11 @@ priority over code-based color schemes).
 
 When no color scheme is specified, the X-Windows scheme is assumed.
 
-Color names are case insensitive.  So "AliceBlue" returns the same
-value as "aliceblue", "ALICEBLUE" and "alICEblue".
+Color names are case insensitive, and spaces or punctuation
+are ignored.  So "Alice Blue" returns the same
+value as "aliceblue", "ALICE-BLUE" and "a*lICEbl-ue".  (If you are
+using color names based on user input, you may want to add additional
+validation of the color names.)
 
 The value returned is in the six-digit hexidecimal format used in HTML and
 CSS (without the initial '#'). To convert it to separate red, green, and
@@ -509,7 +518,8 @@ The following schemes are available by default:
 
 =item X
 
-About 750 color names used in X-Windows.
+About 750 color names used in X-Windows (although about 90+ of them are
+duplicate names with spaces).
 
 =item HTML
 
@@ -566,6 +576,13 @@ You would use the above schema as follows:
 
   tie %colors, 'Graphics::ColorNames', 'Metallic';
 
+The behavior of specifying multiple keys with the same name is undefined
+as to which one takes precedence.
+
+As of version 2.10, case, spaces and punctuation are ignored in color
+names. So a name like "Willy's Favorite Shade-of-Blue" is treated the
+same as "willysfavoroteshadeofblue".
+
 An example of an additional module is the L<Graphics::ColorNames::Mozilla>
 module by Steve Pomeroy.
 
@@ -582,12 +599,13 @@ Since version 1.03, C<NamesRgbTable> may also return a code reference:
 
 See L<Graphics::ColorNames::GrayScale> for an example.
 
-Note that extentions of the form "Graphics::ColourNames::*" are not
-supported at this time, although full scheme module names can be
-specified:
+The alias "Graphics::ColourNames" (British spelling) is no longer available
+as of version 2.01.
+
+Likewise, extentions of the form "Graphics::ColourNames::*" are not
+supported, although full scheme module names can be specified:
 
   tie %NameTable, 'Graphics::ColourNames', 'Graphics::ColourNames::Scheme';
-
 
 =head1 SEE ALSO
 
@@ -603,7 +621,7 @@ types.
 
 Changes since the last release
 
-=for readme include file=Changes start=^2.04 stop=^2.03 type=text
+=for readme include file=Changes start=^2.10 stop=^2.04 type=text
 
 More details can be found in the F<Changes> file.
 
@@ -636,8 +654,8 @@ inconsistencies.
 Feedback is always welcome.  Please use the CPAN Request Tracker at
 L<http://rt.cpan.org> to submit bug reports.
 
-There is now a SourceForge project for this package at
-L<http://sourceforge.net/projects/colornames/>
+Note that the SourceForge project for this package at
+L<http://sourceforge.net/projects/colornames/> is not in use at this time.
 
 If you create additional color schemes, please make them available
 separately in CPAN rather than submit them to me for inclusion into

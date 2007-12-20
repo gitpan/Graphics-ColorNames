@@ -25,7 +25,10 @@ proper spelling was added.
 
 =head1 SEE ALSO
 
-C<Graphics::ColorNames>,  HTML 4.0 Specificiation <http://www.w3.org>
+L<Graphics::ColorNames>,  HTML 4.0 Specificiation <http://www.w3.org>
+
+L<Graphics::ColorNames::SVG>, which uses color names based on the SVG
+specification (which is more recent).
 
 =head1 AUTHOR
 
@@ -39,12 +42,11 @@ modify it under the same terms as Perl itself.
 
 =cut
 
-require 5.006;
-
 use strict;
 use warnings;
 
-our $VERSION = '2.04';
+our $VERSION = '2.10_01';
+$VERSION = eval $VERSION;
 
 sub NamesRgbTable() {
   use integer;

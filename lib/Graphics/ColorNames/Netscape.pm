@@ -54,11 +54,10 @@ modify it under the same terms as Perl itself.
 
 =cut
 
-require 5.006;
-
 use strict;
 
-our $VERSION = '2.04';
+our $VERSION = '2.10_01';
+$VERSION = eval $VERSION;
 
 # See http://home1.netscape.com/home/bg/colorindex.html
 
@@ -74,7 +73,7 @@ sub NamesRgbTable() {
     "yellow"              =>0xffff00,
     "black"               =>0x000000,
     "aquamarine"          =>0x70db93,
-    "baker\'schocolate"   =>0x5c3317,
+    "bakerschocolate"     =>0x5c3317,
     "blueviolet"          =>0x9f5f9f,
     "brass"               =>0xb5a642,
     "brightgold"          =>0xd9d919,
@@ -147,7 +146,7 @@ sub NamesRgbTable() {
     "salmon"              =>0x6f4242,
     "scarlet"             =>0x8c1717,
     "seagreen"            =>0x238e68,
-    "semi-sweetchocolate" =>0x6b4226,
+    "semisweetchocolate"  =>0x6b4226,
     "sienna"              =>0x8e6b23,
     "silver"              =>0xe6e8fa,
     "skyblue"             =>0x3299cc,

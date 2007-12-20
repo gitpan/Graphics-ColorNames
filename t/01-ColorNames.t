@@ -4,12 +4,11 @@ use strict;
 
 use Test::More tests => 54;
 
-use_ok('Graphics::ColorNames', 1.10, qw( hex2tuple tuple2hex all_schemes ));
+use_ok('Graphics::ColorNames', '2.10', qw( hex2tuple tuple2hex all_schemes ));
 
 {
   my %schemes = map { $_=>1, } all_schemes();
   ok((keys %schemes) >= 4); # Windows, Netscape, HTML, and X
-
   ok($schemes{X});
   ok($schemes{HTML});
   ok($schemes{Windows});
@@ -103,7 +102,6 @@ ok(!exists  $colors{NonExistentColorName});
 
 my $colorobj = tied(%colors);
 $colorobj->load_scheme( sub {
-			  my $name = shift;
 			  return 0x123456;        
 			}
 );
