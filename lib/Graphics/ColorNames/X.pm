@@ -30,7 +30,7 @@ Steve Pomeroy <steve_x at earthling.net> -- fixed the broken color definitions
 
 =head1 LICENSE
 
-Copyright (c) 2001-2007 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2008 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
@@ -39,7 +39,7 @@ modify it under the same terms as Perl itself.
 use strict;
 use warnings;
 
-our $VERSION = '2.10_01';
+our $VERSION = '2.10_02';
 $VERSION = eval $VERSION;
 
 # Original name and colors (v1.01 and earlier) from Kevin J. Walsh,
@@ -97,7 +97,6 @@ sub NamesRgbTable() {
     "navyblue"		    => 0x000080,
     "cornflowerblue"	    => 0x6495ed,
     "darkslateblue"	    => 0x483d8b,
-    "slate blue"	    => 0x6a5acd,
     "slateblue"		    => 0x6a5acd,
     "mediumslateblue"	    => 0x7b68ee,
     "lightslateblue"	    => 0x8470ff,

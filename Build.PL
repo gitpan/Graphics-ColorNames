@@ -16,6 +16,7 @@ my $build = Module::Build->new
        'Tie::Sub'                   => 0,
      },
      recommends => {
+       'Color::Library'             => 0.02,
        'Pod::Readme'                => 0.09,
        'Test::Pod::Coverage'        => 0,
        'Test::Pod'                  => 1.00,

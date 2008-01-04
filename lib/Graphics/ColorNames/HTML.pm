@@ -36,7 +36,7 @@ Robert Rothenberg <rrwo at cpan.org>
 
 =head1 LICENSE
 
-Copyright (c) 2001-2007 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2008 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
@@ -45,7 +45,7 @@ modify it under the same terms as Perl itself.
 use strict;
 use warnings;
 
-our $VERSION = '2.10_01';
+our $VERSION = '2.10_02';
 $VERSION = eval $VERSION;
 
 sub NamesRgbTable() {

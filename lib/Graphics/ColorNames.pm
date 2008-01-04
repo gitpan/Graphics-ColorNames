@@ -1,16 +1,18 @@
 package Graphics::ColorNames;
 use 5.006;
 
+use base "Exporter";
+
 use strict;
 use warnings;
-
-use base 'Exporter';
 
 use Carp;
 use Module::Load;
 use Tie::Sub;
 
-our $VERSION   = '2.10_01';
+## our @ISA = qw( Exporter Tie::Hash );
+
+our $VERSION   = '2.10_02';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -29,25 +31,52 @@ my %FoundSchemes = ( );
 my %Schemes     = ( );
 my %Iterators   = ( ); # used by FIRST_KEY, NEXT_KEY
 
+# Since 2.10_02, we've added autoloading color names to the object-
+# oriented interface.
+
+our $AUTOLOAD;
+
+sub AUTOLOAD {
+  $AUTOLOAD =~ /^(.*:)*([\w\_]+)$/;
+  my $name  = $2;
+  my $hex  = (my $self = shift)->FETCH($name);
+  if (defined $hex) {
+    return $hex;
+  }
+  else {
+    croak "No method or color named $name";
+  }
+}
+
 # TODO - see if using Tie::Hash::Layered gives an improvement
 
 sub _load_scheme_from_module {
   my $self   = shift;
   my $scheme = shift;
 
-  my $module = join('::', __PACKAGE__, $scheme);
+  my $base = __PACKAGE__;
+
+  my $module = join('::', $base, $scheme);
   eval { load $module; };
   if ($@) {
     $module = $scheme;
     eval { load $module; };
     if ($@) {
-      croak "Cannot load color naming scheme \`$scheme\'";
+      croak "Cannot load color naming scheme \`$module\'";
     }
   }
     
   {
     no strict 'refs';
-    $self->load_scheme($module->NamesRgbTable);   
+    if ($module =~ $base) {
+	$self->load_scheme($module->NamesRgbTable);
+    }
+    elsif ($module =~ /Color::Library::Dictionary/) {
+	$self->load_scheme($module->_load_color_list);
+    }
+    else {
+	croak "Unknown scheme type: $module";
+    }
   }
 }
 
@@ -90,7 +119,7 @@ sub FETCH {
   if ($key =~ m/^\x23?([\da-f]{6})$/) {
     return $1;
   } else {
-      $key =~ s/\W//g; # ignore non-word characters
+      $key =~ s/[\W\_]//g; # ignore non-word characters
 
       my $val = undef;
       my $i   = 0;
@@ -152,11 +181,17 @@ sub _readonly_error {
   croak "Cannot modify a read-only value";
 }
 
+sub _dummy_method {             # stub to avoid AUTOLOAD 
+}
+
 BEGIN {
   no strict 'refs';
   *STORE  = \ &_readonly_error;
   *DELETE = \ &_readonly_error;
   *CLEAR  = \ &_readonly_error; # causes problems with 'undef'
+
+  *DESTROY = \ &_dummy_method;  
+  *UNTIE   = \ &_dummy_method;
 
   *new    = \ &TIEHASH;
 }
@@ -225,7 +260,7 @@ sub _load_scheme_from_file {
 	my $name  = lc(substr($line, 12));
 	$name     =~ s/[\W]//g; # remove anything that isn't a letter or number
 
-	croak "missing color name",
+	croak "Missing color name",
 	  unless ($name ne "");
 
 	# TODO? Should we add an option to warn if overlapping names
@@ -260,6 +295,21 @@ sub load_scheme {
       push @{$Schemes{($self)}}, { };
       tie %{$Schemes{($self)}->[-1]}, 'Tie::Sub', $scheme;
   }
+  elsif (ref($scheme) eq "ARRAY") {
+      # assumes these are Color::Library::Dictionary 0.02 files 
+      my $s = { };
+      foreach my $rec (@$scheme) {
+	  my $key  =  $rec->[0];
+	  my $name =  $rec->[1];
+	  my $code =  $rec->[5];
+	  $name    =~ s/[\W\_]//g; # ignore non-word characters
+	  $s->{$name} = $code unless (exists $s->{$name});
+	  if ($key =~ /^(.+\:.+)\.(\d+)$/) {
+	      $s->{"$name$2"} = $code;
+	  }
+      }
+      push @{$Schemes{($self)}}, $s;
+  }
   else {
     undef $!;
     eval {
@@ -270,7 +320,7 @@ sub load_scheme {
       }
     };
     if ($@) {
-      croak "error $@ on scheme type ", ref($scheme);
+      croak "Error $@ on scheme type ", ref($scheme);
     }
     elsif ($!) {
       croak "$!";
@@ -349,11 +399,12 @@ Using Build.PL (if you have L<Module::Build> installed):
 
 =head1 DESCRIPTION
 
-This module defines RGB values for common color names. The intention
-is to (1) provide a common module that authors can use with other
-modules to specify colors by name; and (2) free module authors from
-having to "re-invent the wheel" whenever they decide to give the users
-the option of specifying a color by name rather than RGB value.
+This module provides a common interface for obtaining the RGB values
+of colors by standard names.  The intention is to (1) provide a common
+module that authors can use with other modules to specify colors by
+name; and (2) free module authors from having to "re-invent the wheel"
+whenever they decide to give the users the option of specifying a
+color by name rather than RGB value.
 
 =begin readme
 
@@ -380,6 +431,11 @@ to understand than C<0x7A, 0xC5, 0xCD>). The variable is named for its
 function, not form (ie, C<$CadetBlue3>) so that if the author later changes
 the background color, the variable name need not be changed.
 
+You can also defined L</Custom Color Schemes> for specialised palettes
+for websites or institutional publications:
+
+  $color = $ColorTable{'MenuBackground'};
+
 As an added feature, a hexidecimal RGB value in the form of #RRGGBB,
 0xRRGGBB or RRGGBB will return itself:
 
@@ -398,6 +454,13 @@ A valid color scheme may be the name of a color scheme (such as C<X>
 or a full module name such as C<Graphics::ColorNames::X>), a reference
 to a color scheme hash or subroutine, or to the path or open
 filehandle for a F<rgb.txt> file.
+
+As of version 2.1002, one can also use L<Color::Library> dictionaries:
+
+  tie %NameTable, 'Graphics::ColorNames', qw(Color::Library::Dictionary::HTML)
+
+This is an experimental feature which may change in later versions (see
+L</SEE ALSO> for a discussion of the differences between modules).
 
 Multiple schemes can be used:
 
@@ -482,6 +545,13 @@ optional separator (which defauls to a comma).  For example,
 
 =back
 
+Since version 2.10_02, the interface will assume method names
+are color names and return the hex value,
+
+  $obj->black eq $obj->hex("black")
+
+Method names are case-insensitive, and underscores are ignored.
+
 =head2 Utility Functions
 
 These functions are not exported by default, so much be specified to
@@ -549,11 +619,13 @@ F<rgb.txt> file may be specified.
 
 Additional color schemes may be available on CPAN.
 
-=head2 Adding Naming Schemes
+=head2 Custom Color Schemes
 
 You can add naming scheme files by creating a Perl module is the name
 C<Graphics::ColorNames::SCHEMENAME> which has a subroutine named
 C<NamesRgbTable> that returns a hash of color names and RGB values.
+(Schemes with a different base namespace will require the fill namespace
+to be given.)
 
 The color names must be in all lower-case, and the RGB values must be
 24-bit numbers containing the red, green, and blue values in most- significant
@@ -581,7 +653,9 @@ as to which one takes precedence.
 
 As of version 2.10, case, spaces and punctuation are ignored in color
 names. So a name like "Willy's Favorite Shade-of-Blue" is treated the
-same as "willysfavoroteshadeofblue".
+same as "willysfavoroteshadeofblue".  (If your scheme does not include
+duplicate entrieswith spaces and punctuation, then the minimum
+version of L<Graphics::ColorNames> should be 2.10 in your requirements.)
 
 An example of an additional module is the L<Graphics::ColorNames::Mozilla>
 module by Steve Pomeroy.
@@ -599,21 +673,29 @@ Since version 1.03, C<NamesRgbTable> may also return a code reference:
 
 See L<Graphics::ColorNames::GrayScale> for an example.
 
+=head2 Graphics::ColourNames
+
 The alias "Graphics::ColourNames" (British spelling) is no longer available
 as of version 2.01.
 
-Likewise, extentions of the form "Graphics::ColourNames::*" are not
-supported, although full scheme module names can be specified:
-
-  tie %NameTable, 'Graphics::ColourNames', 'Graphics::ColourNames::Scheme';
+It seems absurd to maintain it when all the modules does is provide an
+alternative spelling for the module I<name> without doing anything about
+the component colors of each scheme, and when most other modules
+(and non-Perl software) does not bother with such things.
 
 =head1 SEE ALSO
+
+L<Color::Library> provides an extensive library of color schemes. A notable
+difference is that it supports more complex schemes which contain additional
+information about individual colors and map multiple colors to a single name.
 
 L<Color::Rgb> has a similar function to this module, but parses an
 F<rgb.txt> file.
 
 L<Graphics::ColorObject> can convert between RGB and other color space
 types.
+
+L<Acme::AutoColor> provides subroutines corresponding to color names.
 
 =begin readme
 
@@ -640,22 +722,17 @@ Robert Rothenberg <rrwo at cpan.org>
 Alan D. Salewski <alans at cji.com> for feedback and the addition of
 C<tuple2hex>.
 
-Steve Pomeroy <xavier at cpan.org> for pointing out invalid color
-definitions in X color space.
-
-<chemboy at perlmonk.org> who pointed out a mispelling of "fuchsia" in
-the HTML color space L<http://rt.cpan.org/Ticket/Display.html?id=1704>.
-
-<magnus at mbox604.swipnet.se> who pointed out mispellings and naming
-inconsistencies.
+Steve Pomeroy <xavier at cpan.org>, "chemboy" <chemboy at perlmonk.org>
+and "magnus" <magnus at mbox604.swipnet.se> who pointed out issues
+with various color schemes.
 
 =head2 Suggestions and Bug Reporting
 
 Feedback is always welcome.  Please use the CPAN Request Tracker at
 L<http://rt.cpan.org> to submit bug reports.
 
-Note that the SourceForge project for this package at
-L<http://sourceforge.net/projects/colornames/> is not in use at this time.
+There is a Sourceforge project for this package at
+L<http://sourceforge.net/projects/colornames/>.
 
 If you create additional color schemes, please make them available
 separately in CPAN rather than submit them to me for inclusion into
@@ -665,7 +742,7 @@ this module.
 
 =head1 LICENSE
 
-Copyright (c) 2001-2007 Robert Rothenberg. All rights reserved.
+Copyright (c) 2001-2008 Robert Rothenberg. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

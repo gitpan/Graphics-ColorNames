@@ -4,12 +4,12 @@ use strict;
 
 use Test::More tests => 19;
 
-use_ok('Graphics::ColorNames', 2.10, qw( hex2tuple tuple2hex ));
+use_ok('Graphics::ColorNames', 2.1002, qw( hex2tuple tuple2hex ));
 
 tie my %colors, 'Graphics::ColorNames', 'X';
 ok(tied %colors);
 
-ok(keys %colors == 666); #
+ok(keys %colors == 665); #
 
 my $count = 0;
 foreach my $name (keys %colors)
