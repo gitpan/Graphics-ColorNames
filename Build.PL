@@ -7,6 +7,7 @@ my $build = Module::Build->new
      requires => {
        'perl'                       => '5.006',
        'base'                       => 0,
+#       'AutoLoader'                 => 0,
        'Carp'                       => 0,
        'DirHandle'                  => 0,
        'Exporter'                   => 0,
@@ -24,11 +25,12 @@ my $build = Module::Build->new
      },
      build_requires => {
        'FileHandle'                 => 0,    # for testing
+       'Test::Exception'            => 0,
        'Test::More'                 => 0,
      },
-     autosplit => [
-       'lib/Graphics/ColorNames.pm',
-     ],
+#      autosplit => [
+#        'lib/Graphics/ColorNames.pm',
+#      ],
      create_readme      => ($Module::Build::VERSION >= 0.2702),
      create_makefile_pl => 'traditional',
      dist_author        => 'Robert Rothenberg <rrwo at cpan.org>',

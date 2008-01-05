@@ -26,16 +26,22 @@ INSTALLATION
       perl Build install
 
 SYNOPSIS
-      use Graphics::ColorNames qw( hex2tuple tuple2hex );
+      use Graphics::ColorNames 2.10;
 
-      tie %ColorTable, 'Graphics::ColorNames', 'X';
+      $po = new Graphics::ColorNames(qw( X ));
 
-      $rgbhex1 = $ColorTable{'green'};    # returns '00ff00'
-      $rgbhex2 = tuple2hex( 0, 255, 0 );  # returns '00ff00'
-      @rgbtup  = hex2tuple( $rgbhex );    # returns (0, 255, 0)
+      $rgb = $po->hex('green');          # returns '00ff00'
+      $rgb = $po->hex('green', '0x');    # returns '0x00ff00'
+      $rgb = $po->hex('green', '#');     # returns '#00ff00'
 
-      $rgbhex3 = $ColorTable{'#123abc'};  # returns '123abc'
-      $rgbhex4 = $ColorTable{'123abc'};   # returns '123abc'
+      $rgb = $po->rgb('green');          # returns '0,255,0'
+      @rgb = $po->rgb('green');          # returns (0, 255, 0)  
+
+      $rgb = $po->green;                 # same as $po->hex('green');
+
+      tie %ph, 'Graphics::ColorNames', (qw( X ));
+
+      $rgb = $ph{green};                 # same as $po->hex('green');
 
 DESCRIPTION
     This module provides a common interface for obtaining the RGB values of
@@ -48,8 +54,15 @@ DESCRIPTION
     See the module POD for complete documentation.
 
 REVISION HISTORY
-    Changes since the last release
+    Changes since the last release:
 
+    2.10_03 Sat Jan  5 2008
+            - tests use Test::Exception to catch errors
+            - rewrite parts of documentation to emphasize object-oriented
+              interface rather than the tied interface
+            - implemented a proper DESTROY method
+            - misc code cleanup and reorganization
+    
     2.10_02 Fri Jan  4 2008
             * added support for Color::Library dictionaries
             - minor changes to error messages

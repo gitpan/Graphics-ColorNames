@@ -16,23 +16,26 @@ use constant TEST_CASES => {
 };
 
 use Test::More;
+use Test::Exception;
 
 my $tests = TEST_CASES;
 
 plan tests => 4 + (11 * (keys %$tests));
 
-use_ok('Graphics::ColorNames', 2.1002, (qw(tuple2hex)));
+use_ok('Graphics::ColorNames', 2.1003, (qw(tuple2hex)));
 
 my $rgb = Graphics::ColorNames->new(qw( X ));
 ok(defined $rgb);
 ok($rgb->isa('Graphics::ColorNames'));
 
 {
-    undef $!;
-    eval {
+    # This causes errors
+
+    # local $TODO = "AutoLoading non-existent color method";
+    dies_ok {
 	$rgb->SomeNonExistentColor();
-    };
-    ok($!, "failed on non-existent color");
+    } "SomeNonExistentColor should have failed";
+
 }
 
 foreach my $name (keys %$tests) {

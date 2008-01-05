@@ -9,6 +9,7 @@ WriteMakefile
           'VERSION_FROM' => 'lib/Graphics/ColorNames.pm',
           'PREREQ_PM' => {
                            'base' => 0,
+                           'Test::Exception' => 0,
                            'IO::File' => 0,
                            'Tie::Sub' => 0,
                            'File::Spec' => 0,

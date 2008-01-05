@@ -3,6 +3,7 @@
 use strict;
 
 use Test::More tests => 54;
+use Test::Exception;
 
 use_ok('Graphics::ColorNames', '2.10', qw( hex2tuple tuple2hex all_schemes ));
 
@@ -52,17 +53,13 @@ ok($count == (2*(keys %colors)));
 
 # Test CLEAR, DELETE and STORE as returning errors
 
-eval { undef %colors };
-ok(defined($!));
+dies_ok { undef %colors } "undef %colors";
 
-eval { %colors = (); };
-ok(defined($!));
+dies_ok { %colors = (); } "%colors = ()";
 
-eval { $colors{MyCustomColor} = 'FFFFFF'; };
-ok(defined($!));
+dies_ok { $colors{MyCustomColor} = 'FFFFFF'; } "STORE";
 
-eval { delete($colors{MyCustomColor}); };
-ok(defined($!));
+dies_ok { delete($colors{MyCustomColor}); } "DELETE";
 
 # Test RGB values being passed through
 

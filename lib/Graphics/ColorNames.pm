@@ -6,13 +6,14 @@ use base "Exporter";
 use strict;
 use warnings;
 
+# use AutoLoader;
 use Carp;
 use Module::Load;
 use Tie::Sub;
 
 ## our @ISA = qw( Exporter Tie::Hash );
 
-our $VERSION   = '2.10_02';
+our $VERSION   = '2.10_03';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -26,10 +27,13 @@ our @EXPORT       = ( );
 # duplicates (which sometimes occur when directories are repeated in
 # @INC or via symlinks).  The order does not matter.
 
+# If we use AutoLoader, these should be use vars() ?
+
 my %FoundSchemes = ( );
 
-my %Schemes     = ( );
-my %Iterators   = ( ); # used by FIRST_KEY, NEXT_KEY
+my $SchemeCount  = 0;
+my %Schemes      = ( );
+my %Iterators    = ( ); # used by FIRST_KEY, NEXT_KEY
 
 # Since 2.10_02, we've added autoloading color names to the object-
 # oriented interface.
@@ -39,12 +43,14 @@ our $AUTOLOAD;
 sub AUTOLOAD {
   $AUTOLOAD =~ /^(.*:)*([\w\_]+)$/;
   my $name  = $2;
-  my $hex  = (my $self = shift)->FETCH($name);
+  my $hex   = (my $self = $_[0])->FETCH($name);
   if (defined $hex) {
     return $hex;
   }
   else {
     croak "No method or color named $name";
+    # $AutoLoader::AUTOLOAD = $AUTOLOAD;
+    # goto &AutoLoader::AUTOLOAD;
   }
 }
 
@@ -52,15 +58,12 @@ sub AUTOLOAD {
 
 sub _load_scheme_from_module {
   my $self   = shift;
-  my $scheme = shift;
-
   my $base = __PACKAGE__;
 
-  my $module = join('::', $base, $scheme);
+  my $module = join('::', $base, (my $scheme = shift));
   eval { load $module; };
   if ($@) {
-    $module = $scheme;
-    eval { load $module; };
+    eval { load ($module = $scheme); };
     if ($@) {
       croak "Cannot load color naming scheme \`$module\'";
     }
@@ -82,11 +85,8 @@ sub _load_scheme_from_module {
 
 sub TIEHASH {
   my $class = shift || __PACKAGE__;
+  my $self  = \(my $count = (++$SchemeCount));
 
-  my $count = scalar(keys %Schemes); ## Names
-  my $self  = \$count;
-
-  ## $Names{($self)}   = { };
   $Schemes{($self)} = [ ];
 
   bless $self, $class;
@@ -112,7 +112,7 @@ sub TIEHASH {
 
 sub FETCH {
   my $self   = shift;
-  my $key    = lc(shift);
+  my $key    = lc(shift||"");
 
   # If we're passing it an RGB value, return that value
 
@@ -156,6 +156,99 @@ sub NEXTKEY {
   return $key;
 }
 
+sub load_scheme {
+  my $self   = shift;
+  my $scheme = shift;
+
+  if (ref($scheme) eq "HASH") {
+      push @{ $Schemes{($self)} }, $scheme;
+  }
+  elsif (ref($scheme) eq "CODE") {
+      push @{$Schemes{($self)}}, { };
+      tie %{$Schemes{($self)}->[-1]}, 'Tie::Sub', $scheme;
+  }
+  elsif (ref($scheme) eq "ARRAY") {
+      # assumes these are Color::Library::Dictionary 0.02 files 
+      my $s = { };
+      foreach my $rec (@$scheme) {
+	  my $key  =  $rec->[0];
+	  my $name =  $rec->[1];
+	  my $code =  $rec->[5];
+	  $name    =~ s/[\W\_]//g; # ignore non-word characters
+	  $s->{$name} = $code unless (exists $s->{$name});
+	  if ($key =~ /^(.+\:.+)\.(\d+)$/) {
+	      $s->{"$name$2"} = $code;
+	  }
+      }
+      push @{$Schemes{($self)}}, $s;
+  }
+  else {
+    # TODO - use Exception
+    undef $!;
+    eval {
+      if ((ref($scheme) eq 'GLOB')
+         || ref($scheme) eq "IO::File"   || $scheme->isa('IO::File')
+         || ref($scheme) eq "FileHandle" || $scheme->isa('FileHandle')) {
+	$self->_load_scheme_from_file($scheme);
+      }
+    };
+    if ($@) {
+      croak "Error $@ on scheme type ", ref($scheme);
+    }
+    elsif ($!) {
+      croak "$!";
+    }
+    else {
+	# everything is ok?
+    }
+  }
+}
+
+sub _find_schemes {
+
+    my $path = shift;
+
+    # BUG: deep-named schemes such as Graphics::ColorNames::Foo::Bar
+    # are not supported.
+
+    if (-d $path) {
+      my $dh = DirHandle->new( $path )
+	|| croak "Unable to access directory $path";
+      while (defined(my $fn = $dh->read)) {
+	if ((-r File::Spec->catdir($path, $fn)) && ($fn =~ /(.+)\.pm$/)) {
+	  $FoundSchemes{$1}++;
+	}
+      }
+    }
+  }
+
+sub _readonly_error {
+  croak "Cannot modify a read-only value";
+}
+
+sub DESTROY {
+  my $self = shift;
+  delete $Schemes{$self};
+  delete $Iterators{$self};
+}
+
+sub UNTIE {             # stub to avoid AUTOLOAD 
+}
+
+BEGIN {
+  no strict 'refs';
+  *STORE  = \ &_readonly_error;
+  *DELETE = \ &_readonly_error;
+  *CLEAR  = \ &_readonly_error; # causes problems with 'undef'
+
+  *new    = \ &TIEHASH;
+}
+
+
+1;
+
+# __END__
+
 # Convert 6-digit hexidecimal code (used for HTML etc.) to an array of
 # RGB values
 
@@ -176,49 +269,6 @@ sub tuple2hex {
   my $rgb = sprintf "%.2x%.2x%.2x", $red, $green, $blue;
   return $rgb;
 }
-
-sub _readonly_error {
-  croak "Cannot modify a read-only value";
-}
-
-sub _dummy_method {             # stub to avoid AUTOLOAD 
-}
-
-BEGIN {
-  no strict 'refs';
-  *STORE  = \ &_readonly_error;
-  *DELETE = \ &_readonly_error;
-  *CLEAR  = \ &_readonly_error; # causes problems with 'undef'
-
-  *DESTROY = \ &_dummy_method;  
-  *UNTIE   = \ &_dummy_method;
-
-  *new    = \ &TIEHASH;
-}
-
-1;
-
-
-# Because we use global variables, we cannot have an AutoLoader.
-# __END__
-
-sub _find_schemes {
-
-    my $path = shift;
-
-    # BUG: deep-named schemes such as Graphics::ColorNames::Foo::Bar
-    # are not supported.
-
-    if (-d $path) {
-      my $dh = DirHandle->new( $path )
-	|| croak "Unable to access directory $path";
-      while (defined(my $fn = $dh->read)) {
-	if ((-r File::Spec->catdir($path, $fn)) && ($fn =~ /(.+)\.pm$/)) {
-	  $FoundSchemes{$1}++;
-	}
-      }
-    }
-  }
 
 sub all_schemes {
     unless (%FoundSchemes) {
@@ -284,68 +334,20 @@ sub _load_scheme_from_file {
   }
 }
 
-sub load_scheme {
-  my $self   = shift;
-  my $scheme = shift;
-
-  if (ref($scheme) eq "HASH") {
-      push @{ $Schemes{($self)} }, $scheme;
-  }
-  elsif (ref($scheme) eq "CODE") {
-      push @{$Schemes{($self)}}, { };
-      tie %{$Schemes{($self)}->[-1]}, 'Tie::Sub', $scheme;
-  }
-  elsif (ref($scheme) eq "ARRAY") {
-      # assumes these are Color::Library::Dictionary 0.02 files 
-      my $s = { };
-      foreach my $rec (@$scheme) {
-	  my $key  =  $rec->[0];
-	  my $name =  $rec->[1];
-	  my $code =  $rec->[5];
-	  $name    =~ s/[\W\_]//g; # ignore non-word characters
-	  $s->{$name} = $code unless (exists $s->{$name});
-	  if ($key =~ /^(.+\:.+)\.(\d+)$/) {
-	      $s->{"$name$2"} = $code;
-	  }
-      }
-      push @{$Schemes{($self)}}, $s;
-  }
-  else {
-    undef $!;
-    eval {
-      if ((ref($scheme) eq 'GLOB')
-         || ref($scheme) eq "IO::File"   || $scheme->isa('IO::File')
-         || ref($scheme) eq "FileHandle" || $scheme->isa('FileHandle')) {
-	$self->_load_scheme_from_file($scheme);
-      }
-    };
-    if ($@) {
-      croak "Error $@ on scheme type ", ref($scheme);
-    }
-    elsif ($!) {
-      croak "$!";
-    }
-    else {
-	# everything is ok?
-    }
-  }
-}
 
 sub hex {
     my $self = shift;
-    my $name = shift;
-    my $rgb  = $self->FETCH($name);
-    my $pre  = shift;
-    unless (defined $pre) { $pre = ""; }
+    my $rgb  = $self->FETCH(my $name = shift);
+    my $pre  = shift || "";
     return ($pre.$rgb);
 }
 
 sub rgb {
     my $self = shift;
-    my $name = shift;
-    my @rgb  = hex2tuple($self->FETCH($name));
-    my $sep  = shift || ',';
+    my @rgb  = hex2tuple($self->FETCH(my $name = shift));
+    my $sep  = shift || ','; # (*)
     return wantarray ? @rgb : join($sep,@rgb);
+# (*) A possible bug, if one uses "0" as a separator. But this is not likely
 }
 
 __END__
@@ -386,16 +388,22 @@ Using Build.PL (if you have L<Module::Build> installed):
 
 =head1 SYNOPSIS
 
-  use Graphics::ColorNames qw( hex2tuple tuple2hex );
+  use Graphics::ColorNames 2.10;
 
-  tie %ColorTable, 'Graphics::ColorNames', 'X';
+  $po = new Graphics::ColorNames(qw( X ));
 
-  $rgbhex1 = $ColorTable{'green'};    # returns '00ff00'
-  $rgbhex2 = tuple2hex( 0, 255, 0 );  # returns '00ff00'
-  @rgbtup  = hex2tuple( $rgbhex );    # returns (0, 255, 0)
+  $rgb = $po->hex('green');          # returns '00ff00'
+  $rgb = $po->hex('green', '0x');    # returns '0x00ff00'
+  $rgb = $po->hex('green', '#');     # returns '#00ff00'
 
-  $rgbhex3 = $ColorTable{'#123abc'};  # returns '123abc'
-  $rgbhex4 = $ColorTable{'123abc'};   # returns '123abc'
+  $rgb = $po->rgb('green');          # returns '0,255,0'
+  @rgb = $po->rgb('green');          # returns (0, 255, 0)  
+
+  $rgb = $po->green;                 # same as $po->hex('green');
+
+  tie %ph, 'Graphics::ColorNames', (qw( X ));
+
+  $rgb = $ph{green};                 # same as $po->hex('green');
 
 =head1 DESCRIPTION
 
@@ -416,38 +424,39 @@ See the module POD for complete documentation.
 
 For example,
 
-  use Graphics::ColorNames 'hex2tuple';
-  tie %ColorTable, 'Graphics::ColorNames';
+  use Graphics::ColorNames 2.10;
 
   use GD;
 
+  $pal = new Graphics::ColorNames;
+
   $img = new GD::Image(100, 100);
 
-  $bgColor = $img->colorAllocate( hex2tuple( $ColorTable{'CadetBlue3'} ) );
+  $bgColor = $img->colorAllocate( $pal->rgb('CadetBlue3') );
 
-Though a little 'bureaucratic', the meaning of this code is clearer:
+Although this is a little "bureaucratic", the meaning of this code is clear:
 C<$bgColor> (or background color) is 'CadetBlue3' (which is easier to for one
 to understand than C<0x7A, 0xC5, 0xCD>). The variable is named for its
 function, not form (ie, C<$CadetBlue3>) so that if the author later changes
 the background color, the variable name need not be changed.
 
-You can also defined L</Custom Color Schemes> for specialised palettes
+You can also define L</Custom Color Schemes> for specialised palettes
 for websites or institutional publications:
 
-  $color = $ColorTable{'MenuBackground'};
+  $color = $pal->hex('MenuBackground');
 
 As an added feature, a hexidecimal RGB value in the form of #RRGGBB,
 0xRRGGBB or RRGGBB will return itself:
 
-  my $rgbhex3 = $ColorTable{'#123abc'};  # returns '123abc'
+  $color = $pal->hex('#123abc');         # returns '123abc'
 
 =head2 Tied Interface
 
 The standard interface (prior to version 0.40) is through a tied hash:
 
-  tie %NameTable, 'Graphics::ColorNames', @SchemeList;
+  tie %pal, 'Graphics::ColorNames', @schemes;
 
-where C<%NameTable> is the tied hash and C<@SchemeList> is a list of
+where C<%pal> is the tied hash and C<@schemes> is a list of
 L<color schemes|/Color Schemes>.
 
 A valid color scheme may be the name of a color scheme (such as C<X>
@@ -457,19 +466,20 @@ filehandle for a F<rgb.txt> file.
 
 As of version 2.1002, one can also use L<Color::Library> dictionaries:
 
-  tie %NameTable, 'Graphics::ColorNames', qw(Color::Library::Dictionary::HTML)
+  tie %pal, 'Graphics::ColorNames', qw(Color::Library::Dictionary::HTML);
 
 This is an experimental feature which may change in later versions (see
 L</SEE ALSO> for a discussion of the differences between modules).
 
 Multiple schemes can be used:
 
-  tie %NameTable, 'Graphics::ColorNames', qw(HTML Netscape);
+  tie %pal, 'Graphics::ColorNames', qw(HTML Netscape);
 
 In this case, if the name is not a valid HTML color, the Netscape name
 will be used.
 
-One can load all available schemes (as of version 2.0):
+One can load all available schemes in the Graphics::ColorNames namespace
+(as of version 2.0):
 
   use Graphics::ColorNames 2.0, 'all_schemes';
   tie %NameTable, 'Graphics::ColorNames', all_schemes();
@@ -701,7 +711,7 @@ L<Acme::AutoColor> provides subroutines corresponding to color names.
 
 =head1 REVISION HISTORY
 
-Changes since the last release
+Changes since the last release:
 
 =for readme include file=Changes start=^2.10 stop=^2.04 type=text
 
