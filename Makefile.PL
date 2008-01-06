@@ -11,7 +11,6 @@ WriteMakefile
                            'base' => 0,
                            'Test::Exception' => 0,
                            'IO::File' => 0,
-                           'Tie::Sub' => 0,
                            'File::Spec' => 0,
                            'FileHandle' => 0,
                            'Exporter' => 0,

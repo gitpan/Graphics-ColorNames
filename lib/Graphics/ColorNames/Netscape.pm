@@ -56,7 +56,7 @@ modify it under the same terms as Perl itself.
 
 use strict;
 
-our $VERSION = '2.10_03';
+our $VERSION = '2.10_04';
 $VERSION = eval $VERSION;
 
 # See http://home1.netscape.com/home/bg/colorindex.html

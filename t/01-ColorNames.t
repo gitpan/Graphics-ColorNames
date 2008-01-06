@@ -98,10 +98,7 @@ ok(!exists  $colors{NonExistentColorName});
 # Test dynamic loading of scheme
 
 my $colorobj = tied(%colors);
-$colorobj->load_scheme( sub {
-			  return 0x123456;        
-			}
-);
+$colorobj->load_scheme({ nonexistentcolorname => 0x123456 } );
 ok($colors{NonExistentColorName} eq '123456');
 
 

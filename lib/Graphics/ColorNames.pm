@@ -9,11 +9,8 @@ use warnings;
 # use AutoLoader;
 use Carp;
 use Module::Load;
-use Tie::Sub;
 
-## our @ISA = qw( Exporter Tie::Hash );
-
-our $VERSION   = '2.10_03';
+our $VERSION   = '2.10_04';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -30,10 +27,6 @@ our @EXPORT       = ( );
 # If we use AutoLoader, these should be use vars() ?
 
 my %FoundSchemes = ( );
-
-my $SchemeCount  = 0;
-my %Schemes      = ( );
-my %Iterators    = ( ); # used by FIRST_KEY, NEXT_KEY
 
 # Since 2.10_02, we've added autoloading color names to the object-
 # oriented interface.
@@ -85,9 +78,10 @@ sub _load_scheme_from_module {
 
 sub TIEHASH {
   my $class = shift || __PACKAGE__;
-  my $self  = \(my $count = (++$SchemeCount));
-
-  $Schemes{($self)} = [ ];
+  my $self  = {
+   _schemes  => [ ],
+   _iterator => 0,
+  };
 
   bless $self, $class;
 
@@ -123,8 +117,8 @@ sub FETCH {
 
       my $val = undef;
       my $i   = 0;
-      while ((!defined $val) && ($i < @{$Schemes{($self)}})) {
-	  $val = $Schemes{($self)}->[$i++]->{$key};
+      while ((!defined $val) && ($i < @{$self->{_schemes}})) {
+	  $val = $self->{_schemes}->[$i++]->{$key};
       }
 
       if (defined $val) {
@@ -141,17 +135,15 @@ sub EXISTS {
 }
 
 sub FIRSTKEY {
-  my $self = shift;
-  $Iterators{($self)} = 0;
-  each %{$Schemes{$self}->[$Iterators{($self)}]};
+  (my $self = shift)->{_iterator} = 0;
+  each %{$self->{_schemes}->[$self->{_iterator}]};
 }
 
 sub NEXTKEY {
   my $self = shift;
-  my ($key, $val)  = each %{$Schemes{$self}->[$Iterators{($self)}]};
+  my ($key, $val)  = each %{$self->{_schemes}->[$self->{_iterator}]};
   unless (defined $key) {
-      $Iterators{($self)}++;
-      ($key, $val)  = each %{$Schemes{$self}->[$Iterators{($self)}]};
+      ($key, $val)  = each %{$self->{_schemes}->[++$self->{_iterator}]};
   }
   return $key;
 }
@@ -161,11 +153,12 @@ sub load_scheme {
   my $scheme = shift;
 
   if (ref($scheme) eq "HASH") {
-      push @{ $Schemes{($self)} }, $scheme;
+      push @{$self->{_schemes}}, $scheme;
   }
   elsif (ref($scheme) eq "CODE") {
-      push @{$Schemes{($self)}}, { };
-      tie %{$Schemes{($self)}->[-1]}, 'Tie::Sub', $scheme;
+      require Tie::Sub; # load Tie::Sub on demand
+      push @{$self->{_schemes}}, { };
+      tie %{$self->{_schemes}->[-1]}, 'Tie::Sub', $scheme;
   }
   elsif (ref($scheme) eq "ARRAY") {
       # assumes these are Color::Library::Dictionary 0.02 files 
@@ -180,7 +173,7 @@ sub load_scheme {
 	      $s->{"$name$2"} = $code;
 	  }
       }
-      push @{$Schemes{($self)}}, $s;
+      push @{$self->{_schemes}}, $s;
   }
   else {
     # TODO - use Exception
@@ -228,8 +221,8 @@ sub _readonly_error {
 
 sub DESTROY {
   my $self = shift;
-  delete $Schemes{$self};
-  delete $Iterators{$self};
+  delete $self->{_schemes};
+  delete $self->{_iterator};
 }
 
 sub UNTIE {             # stub to avoid AUTOLOAD 
@@ -247,7 +240,7 @@ BEGIN {
 
 1;
 
-# __END__
+## __END__
 
 # Convert 6-digit hexidecimal code (used for HTML etc.) to an array of
 # RGB values

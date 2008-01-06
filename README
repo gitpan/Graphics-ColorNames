@@ -56,6 +56,10 @@ DESCRIPTION
 REVISION HISTORY
     Changes since the last release:
 
+    2.10_04 Sun Jan  6 2008
+            - reverted back to standard object-oriented style
+            - Tie::Sub is only loaded when a subroutine is used for scheme
+    
     2.10_03 Sat Jan  5 2008
             - tests use Test::Exception to catch errors
             - rewrite parts of documentation to emphasize object-oriented
