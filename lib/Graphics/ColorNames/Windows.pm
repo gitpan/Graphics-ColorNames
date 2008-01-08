@@ -36,7 +36,7 @@ modify it under the same terms as Perl itself.
 use strict;
 use warnings;
 
-our $VERSION = '2.10_04';
+our $VERSION = '2.10_05';
 $VERSION = eval $VERSION;
 
 sub NamesRgbTable() {

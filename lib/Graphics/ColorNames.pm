@@ -8,9 +8,10 @@ use warnings;
 
 # use AutoLoader;
 use Carp;
-use Module::Load;
+use Module::Load 0.10;
+use Module::Loaded;
 
-our $VERSION   = '2.10_04';
+our $VERSION   = '2.10_05';
 $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
@@ -47,16 +48,26 @@ sub AUTOLOAD {
   }
 }
 
+
+sub _load {
+  while(my $module = shift) {
+    unless (is_loaded($module)) {
+      load($module);
+      mark_as_loaded($module) unless (is_loaded($module));
+    }
+  }
+}
+
 # TODO - see if using Tie::Hash::Layered gives an improvement
 
 sub _load_scheme_from_module {
-  my $self   = shift;
+  my $self = shift;
   my $base = __PACKAGE__;
 
   my $module = join('::', $base, (my $scheme = shift));
-  eval { load $module; };
+  eval { _load($module); };
   if ($@) {
-    eval { load ($module = $scheme); };
+    eval { _load($module = $scheme); };
     if ($@) {
       croak "Cannot load color naming scheme \`$module\'";
     }
@@ -156,7 +167,7 @@ sub load_scheme {
       push @{$self->{_schemes}}, $scheme;
   }
   elsif (ref($scheme) eq "CODE") {
-      require Tie::Sub; # load Tie::Sub on demand
+      _load("Tie::Sub");
       push @{$self->{_schemes}}, { };
       tie %{$self->{_schemes}->[-1]}, 'Tie::Sub', $scheme;
   }
@@ -265,9 +276,8 @@ sub tuple2hex {
 
 sub all_schemes {
     unless (%FoundSchemes) {
-
-      require DirHandle;  # These only need to be loaded once
-      require File::Spec;
+	
+      _load("DirHandle", "File::Spec");
 
       foreach my $dir (@INC) {
 	_find_schemes(
@@ -285,10 +295,10 @@ sub _load_scheme_from_file {
     unless (-r $file) {
       croak "Cannot load scheme from file: \'$file\'";
     }
-    require IO::File;
+    _load("IO::File");
   }
 
-  my $fh = ref($file) ? $file : (new IO::File);
+  my $fh = ref($file) ? $file : (IO::File->new);
   unless (ref $file) {
     open($fh, $file)
       || croak "Cannot open file: \'$file\'";
@@ -354,9 +364,31 @@ Graphics::ColorNames - defines RGB values for common color names
 =head1 REQUIREMENTS
 
 C<Graphics::ColorNames> should work on Perl 5.6.0.  It requires the
-following non-standard modules:
+following non-core (depending on your Perl version) modules:
 
   Module::Load
+  Module::Loaded
+
+The following modules are not required for using most features but
+are recommended:
+
+  Color::Library
+  Tie::Sub
+
+L<Installation|/INSTALLATION> requires the following testing modules:
+
+  Test::Exception
+  Test::More
+
+If the C<DEVEL_TESTS> environment variable is set, the tests will also
+use the following modules for running developer tests, if they are
+installed:
+
+  Test::Pod
+  Test::Pod::Coverage
+  Test::Portability::Files
+
+The developer tests are for quality-control purposes.
 
 =head1 INSTALLATION
 

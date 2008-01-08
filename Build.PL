@@ -14,6 +14,7 @@ my $build = Module::Build->new
        'File::Spec'                 => 0,
        'IO::File'                   => 0,
        'Module::Load'               => '0.10',
+       'Module::Loaded'             => 0,
      },
      recommends => {
        'Color::Library'             => 0.02,

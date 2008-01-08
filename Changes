@@ -1,6 +1,12 @@
 Revision history for Perl extension Graphics::ColorNames (with significant
 updates noted by asterisks, '*'):
 
+2.10_05 Tue Jan  8 2008
+	* checks if modules already loaded before re-loading them
+	  (uses Module::Loaded for this)
+	- requires changed to load for dynamically loaded modules
+	- updated README
+
 2.10_04 Sun Jan  6 2008
 	- reverted back to standard object-oriented style
 	- Tie::Sub is only loaded when a subroutine is used for scheme

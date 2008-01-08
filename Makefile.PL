@@ -16,6 +16,7 @@ WriteMakefile
                            'Exporter' => 0,
                            'Carp' => 0,
                            'Test::More' => 0,
+                           'Module::Loaded' => 0,
                            'Module::Load' => '0.10',
                            'DirHandle' => 0
                          }

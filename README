@@ -3,9 +3,31 @@ NAME
 
 REQUIREMENTS
     `Graphics::ColorNames' should work on Perl 5.6.0. It requires the
-    following non-standard modules:
+    following non-core (depending on your Perl version) modules:
 
       Module::Load
+      Module::Loaded
+
+    The following modules are not required for using most features but are
+    recommended:
+
+      Color::Library
+      Tie::Sub
+
+    Installation requires the following testing modules:
+
+      Test::Exception
+      Test::More
+
+    If the `DEVEL_TESTS' environment variable is set, the tests will also
+    use the following modules for running developer tests, if they are
+    installed:
+
+      Test::Pod
+      Test::Pod::Coverage
+      Test::Portability::Files
+
+    The developer tests are for quality-control purposes.
 
 INSTALLATION
     Installation can be done using the traditional Makefile.PL or the newer
@@ -56,6 +78,12 @@ DESCRIPTION
 REVISION HISTORY
     Changes since the last release:
 
+    2.10_05 Tue Jan  8 2008
+            * checks if modules already loaded before re-loading them
+              (uses Module::Loaded for this)
+            - requires changed to load for dynamically loaded modules
+            - updated README
+    
     2.10_04 Sun Jan  6 2008
             - reverted back to standard object-oriented style
             - Tie::Sub is only loaded when a subroutine is used for scheme

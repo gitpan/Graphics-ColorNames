@@ -18,8 +18,8 @@ with Netscape 1.1 (I cannot determine whether they were once usable in
 Netscape or were arbitrary names for RGB values-- I<many of these names are
 not recognized by later versions of Netscape>).
 
-This scheme will be deprecated in future versions of L<Graphics::ColorNames>
-but available as a separate module from CPAN.
+This scheme is deprecated, and will be removed from future versions of 
+L<Graphics::ColorNames> but available as a separate module from CPAN.
 
 =head1 SEE ALSO
 
@@ -55,8 +55,9 @@ modify it under the same terms as Perl itself.
 =cut
 
 use strict;
+use warnings;
 
-our $VERSION = '2.10_04';
+our $VERSION = '2.10_05';
 $VERSION = eval $VERSION;
 
 # See http://home1.netscape.com/home/bg/colorindex.html
@@ -166,6 +167,7 @@ sub NamesRgbTable() {
     "yellowgreen"         =>0x99cc32,
   };
 }
+
 
 1;
 
