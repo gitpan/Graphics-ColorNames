@@ -1,6 +1,11 @@
 Revision history for Perl extension Graphics::ColorNames (with significant
 updates noted by asterisks, '*'):
 
+2.11    Thu Jan 10 2008
+	- updated version number for release
+	- minor changes of text format
+	- added fix for problems with Graphics::ColorNames::GrayScale
+
 2.10_05 Tue Jan  8 2008
 	* checks if modules already loaded before re-loading them
 	  (uses Module::Loaded for this)

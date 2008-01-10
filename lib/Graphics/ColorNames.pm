@@ -11,8 +11,8 @@ use Carp;
 use Module::Load 0.10;
 use Module::Loaded;
 
-our $VERSION   = '2.10_05';
-$VERSION = eval $VERSION;
+our $VERSION   = '2.11';
+# $VERSION = eval $VERSION;
 
 our %EXPORT_TAGS = (
  'all'     => [ qw( hex2tuple tuple2hex all_schemes ) ],
@@ -124,7 +124,8 @@ sub FETCH {
   if ($key =~ m/^\x23?([\da-f]{6})$/) {
     return $1;
   } else {
-      $key =~ s/[\W\_]//g; # ignore non-word characters
+      
+      $key =~ s/[^a-z\d\%]//g; # ignore non-word characters
 
       my $val = undef;
       my $i   = 0;
@@ -738,7 +739,7 @@ L<Acme::AutoColor> provides subroutines corresponding to color names.
 
 Changes since the last release:
 
-=for readme include file=Changes start=^2.10 stop=^2.04 type=text
+=for readme include file=Changes start=^2.11 stop=^2.04 type=text
 
 More details can be found in the F<Changes> file.
 

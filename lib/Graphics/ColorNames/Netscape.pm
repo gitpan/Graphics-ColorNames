@@ -57,8 +57,8 @@ modify it under the same terms as Perl itself.
 use strict;
 use warnings;
 
-our $VERSION = '2.10_05';
-$VERSION = eval $VERSION;
+our $VERSION = '2.11';
+#$VERSION = eval $VERSION;
 
 # See http://home1.netscape.com/home/bg/colorindex.html
 
@@ -172,3 +172,4 @@ sub NamesRgbTable() {
 1;
 
 __END__
+
